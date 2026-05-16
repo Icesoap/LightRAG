@@ -21,8 +21,8 @@ cd LightRAG
 
 ```bash
 # Linux/MacOS
-cp .env.example .env
-# Edit .env with your preferred configuration
+cp ..env.example ..env
+# Edit ..env with your preferred configuration
 ```
 ```powershell
 # Windows PowerShell
@@ -93,7 +93,7 @@ either variable is missing.
 Before exposing the generated stack beyond localhost, run:
 
 ```bash
-make env-security-check
+make .env-security-check
 ```
 
 That command audits the current `.env` for missing authentication, unsafe whitelist settings, weak

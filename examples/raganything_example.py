@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/.env python
 """
 Example script demonstrating the integration of MinerU parser with RAGAnything
 
@@ -250,7 +250,7 @@ def main():
     parser.add_argument(
         "--api-key",
         default=os.getenv("OPENAI_API_KEY"),
-        help="OpenAI API key (defaults to OPENAI_API_KEY env var)",
+        help="OpenAI API key (defaults to OPENAI_API_KEY .env var)",
     )
     parser.add_argument("--base-url", help="Optional base URL for API")
 

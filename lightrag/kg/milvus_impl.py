@@ -331,7 +331,7 @@ class MilvusIndexConfig:
 @dataclass
 class MilvusVectorDBStorage(BaseVectorStorage):
     def _get_milvus_connection_kwargs(self, include_db_name: bool = True) -> dict:
-        """Build Milvus connection kwargs from env/config."""
+        """Build Milvus connection kwargs from .env/config."""
         connection_kwargs = {
             "uri": os.environ.get(
                 "MILVUS_URI",

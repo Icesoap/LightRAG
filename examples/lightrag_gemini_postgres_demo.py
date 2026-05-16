@@ -12,7 +12,7 @@ This example demonstrates how to use LightRAG with:
 Prerequisites:
 1. PostgreSQL database running and accessible
 2. Required tables will be auto-created by LightRAG
-3. Set environment variables (example .env):
+3. Set environment variables (example ..env):
 
    POSTGRES_HOST=localhost
    POSTGRES_PORT=5432

@@ -26,6 +26,7 @@ dependencies = [
     "google-api-core>=2.0.0,<3.0.0",
     "google-genai>=1.0.0,<2.0.0",
     "json_repair",
+    "llama-index>=0.14.6",
     "nano-vectordb",
     "networkx",
     "numpy>=1.24.0,<3.0.0",
@@ -84,7 +85,8 @@ api = [
     "python-jose[cryptography]",
     "python-multipart",
     "pytz",
-    "uvicorn",
+    "uvicorn==0.33.0",
+    "click<8.2.0",
     "gunicorn",
     # Document processing dependencies (required for API document upload functionality)
     "openpyxl>=3.0.0,<4.0.0",      # XLSX processing
@@ -92,6 +94,9 @@ api = [
     "pypdf>=6.1.0",                 # PDF processing
     "python-docx>=0.8.11,<2.0.0",  # DOCX processing
     "python-pptx>=0.6.21,<2.0.0",  # PPTX processing
+    "ollama",
+    "neo4j",
+    "pymilvus",
 ]
 
 # Advanced document processing engine (optional)

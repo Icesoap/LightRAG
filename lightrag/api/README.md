@@ -109,10 +109,10 @@ EMBEDDING_DIM=1024
 Instead of editing `env.example` by hand, you can use the interactive setup wizard to generate a configured `.env` and, when needed, `docker-compose.final.yml`:
 
 ```bash
-make env-base           # Required first step: LLM, embedding, reranker
-make env-storage        # Optional: storage backends and database services
-make env-server         # Optional: server port, auth, and SSL
-make env-security-check # Optional: audit the current .env for security risks
+make .env-base           # Required first step: LLM, embedding, reranker
+make .env-storage        # Optional: storage backends and database services
+make .env-server         # Optional: server port, auth, and SSL
+make .env-security-check # Optional: audit the current ..env for security risks
 ```
 
 For a full description of every target and what each flow does, see [docs/InteractiveSetup.md](../../docs/InteractiveSetup.md).
@@ -643,7 +643,7 @@ LLM_BINDING_HOST=https://api.openai.com/v1
 LLM_BINDING_API_KEY=your-api-key
 
 ### Embedding Configuration (Use valid host. For local services installed with docker, you can use host.docker.internal)
-# see also env.ollama-binding-options.example for fine tuning ollama
+# see also .env.ollama-binding-options.example for fine tuning ollama
 EMBEDDING_MODEL=bge-m3:latest
 EMBEDDING_DIM=1024
 EMBEDDING_BINDING=ollama

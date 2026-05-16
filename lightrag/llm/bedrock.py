@@ -158,14 +158,14 @@ async def bedrock_complete_if_cache(
         logging.debug(
             "enable_cot=True is not supported for Bedrock and will be ignored."
         )
-    # Respect existing env; only set if a non-empty value is available
+    # Respect existing .env; only set if a non-empty value is available
     access_key = os.environ.get("AWS_ACCESS_KEY_ID") or aws_access_key_id
     secret_key = os.environ.get("AWS_SECRET_ACCESS_KEY") or aws_secret_access_key
     session_token = os.environ.get("AWS_SESSION_TOKEN") or aws_session_token
     _set_env_if_present("AWS_ACCESS_KEY_ID", access_key)
     _set_env_if_present("AWS_SECRET_ACCESS_KEY", secret_key)
     _set_env_if_present("AWS_SESSION_TOKEN", session_token)
-    # Region handling: prefer env, else kwarg (optional)
+    # Region handling: prefer .env, else kwarg (optional)
     region = os.environ.get("AWS_REGION") or kwargs.pop("aws_region", None)
     kwargs.pop("hashing_kv", None)
     # Capture stream flag (if provided) and remove from kwargs since it's not a Bedrock API parameter
@@ -370,7 +370,7 @@ async def bedrock_embed(
     aws_secret_access_key=None,
     aws_session_token=None,
 ) -> np.ndarray:
-    # Respect existing env; only set if a non-empty value is available
+    # Respect existing .env; only set if a non-empty value is available
     access_key = os.environ.get("AWS_ACCESS_KEY_ID") or aws_access_key_id
     secret_key = os.environ.get("AWS_SECRET_ACCESS_KEY") or aws_secret_access_key
     session_token = os.environ.get("AWS_SESSION_TOKEN") or aws_session_token
@@ -378,7 +378,7 @@ async def bedrock_embed(
     _set_env_if_present("AWS_SECRET_ACCESS_KEY", secret_key)
     _set_env_if_present("AWS_SESSION_TOKEN", session_token)
 
-    # Region handling: prefer env
+    # Region handling: prefer .env
     region = os.environ.get("AWS_REGION")
 
     session = aioboto3.Session()

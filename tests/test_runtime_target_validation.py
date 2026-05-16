@@ -40,9 +40,9 @@ def test_validate_runtime_target_rejects_host_in_container() -> None:
 
     assert is_valid is False
     assert "\n" in error_message
-    assert "Configuration error in .env" in error_message
+    assert "Configuration error in ..env" in error_message
     assert "LIGHTRAG_RUNTIME_TARGET=host" in error_message
-    assert "This value from .env" in error_message
+    assert "This value from ..env" in error_message
     assert "Docker" in error_message
 
 
@@ -75,9 +75,9 @@ def test_validate_runtime_target_rejects_container_target_on_host() -> None:
 
     assert is_valid is False
     assert "\n" in error_message
-    assert "Configuration error in .env" in error_message
+    assert "Configuration error in ..env" in error_message
     assert "LIGHTRAG_RUNTIME_TARGET=docker" in error_message
-    assert "This value from .env" in error_message
+    assert "This value from ..env" in error_message
     assert "Docker or Kubernetes" in error_message
 
 
@@ -89,14 +89,14 @@ def test_validate_runtime_target_rejects_invalid_value() -> None:
 
     assert is_valid is False
     assert "\n" in error_message
-    assert "Configuration error in .env" in error_message
+    assert "Configuration error in ..env" in error_message
     assert "must be 'host' or 'compose'" in error_message
 
 
 def test_validate_runtime_target_from_env_file_uses_raw_env_value(
     tmp_path: Path,
 ) -> None:
-    env_file = tmp_path / ".env"
+    env_file = tmp_path / "..env"
     env_file.write_text("LIGHTRAG_RUNTIME_TARGET=compose\n", encoding="utf-8")
 
     is_valid, error_message = validate_runtime_target_from_env_file(

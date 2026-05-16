@@ -5,16 +5,16 @@ This example demonstrates how to use rerank functionality with LightRAG
 to improve retrieval quality across different query modes.
 
 Configuration Required:
-1. Set your OpenAI LLM API key and base URL with env vars
+1. Set your OpenAI LLM API key and base URL with .env vars
     LLM_MODEL
     LLM_BINDING_HOST
     LLM_BINDING_API_KEY
-2. Set your OpenAI embedding API key and base URL with env vars:
+2. Set your OpenAI embedding API key and base URL with .env vars:
     EMBEDDING_MODEL
     EMBEDDING_DIM
     EMBEDDING_BINDING_HOST
     EMBEDDING_BINDING_API_KEY
-3. Set your vLLM deployed AI rerank model setting with env vars:
+3. Set your vLLM deployed AI rerank model setting with .env vars:
     RERANK_BINDING=cohere
     RERANK_MODEL (e.g., answerai-colbert-small-v1 or rerank-v3.5)
     RERANK_BINDING_HOST (e.g., https://api.cohere.com/v2/rerank or LiteLLM proxy)

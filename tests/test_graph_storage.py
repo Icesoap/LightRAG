@@ -1,8 +1,8 @@
-#!/usr/bin/env python
+#!/usr/bin/.env python
 """
 General-purpose graph storage test program.
 
-This program selects the graph storage type to use based on the LIGHTRAG_GRAPH_STORAGE configuration in .env,
+This program selects the graph storage type to use based on the LIGHTRAG_GRAPH_STORAGE configuration in ..env,
 and tests its basic and advanced operations.
 
 Supported graph storage types include:
@@ -43,11 +43,11 @@ async def mock_embedding_func(texts):
 
 def check_env_file():
     """
-    Check if the .env file exists and issue a warning if it does not.
+    Check if the ..env file exists and issue a warning if it does not.
     Returns True to continue execution, False to exit.
     """
-    if not os.path.exists(".env"):
-        warning_msg = "Warning: .env file not found in the current directory. This may affect storage configuration loading."
+    if not os.path.exists("..env"):
+        warning_msg = "Warning: ..env file not found in the current directory. This may affect storage configuration loading."
         ASCIIColors.yellow(warning_msg)
 
         # Check if running in an interactive terminal
@@ -1216,12 +1216,12 @@ async def main():
     ╚══════════════════════════════════════════════════════════════╝
     """)
 
-    # Check for .env file
+    # Check for ..env file
     if not check_env_file():
         return
 
     # Load environment variables
-    load_dotenv(dotenv_path=".env", override=False)
+    load_dotenv(dotenv_path="..env", override=False)
 
     # Get graph storage type
     graph_storage_type = os.getenv("LIGHTRAG_GRAPH_STORAGE", "NetworkXStorage")

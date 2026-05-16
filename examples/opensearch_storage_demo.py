@@ -9,7 +9,7 @@ Tests all 4 storage types against a live OpenSearch cluster:
 
 Prerequisites:
     OpenSearch cluster running with k-NN plugin enabled.
-    Set env vars: OPENSEARCH_HOSTS, OPENSEARCH_USER, OPENSEARCH_PASSWORD,
+    Set .env vars: OPENSEARCH_HOSTS, OPENSEARCH_USER, OPENSEARCH_PASSWORD,
                   OPENSEARCH_USE_SSL, OPENSEARCH_VERIFY_CERTS
 
 Usage:

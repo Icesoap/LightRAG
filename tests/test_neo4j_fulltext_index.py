@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/.env python
 """
 Test Neo4j full-text index functionality, specifically:
 1. Workspace-specific index naming

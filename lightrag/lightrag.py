@@ -116,10 +116,10 @@ from lightrag.utils import (
 from lightrag.types import KnowledgeGraph
 from dotenv import load_dotenv
 
-# use the .env that is inside the current folder
-# allows to use different .env file for each lightrag instance
-# the OS environment variables take precedence over the .env file
-load_dotenv(dotenv_path=".env", override=False)
+# use the ..env that is inside the current folder
+# allows to use different ..env file for each lightrag instance
+# the OS environment variables take precedence over the ..env file
+load_dotenv(dotenv_path="..env", override=False)
 
 # TODO: TO REMOVE @Yannick
 config = configparser.ConfigParser()
@@ -1450,12 +1450,14 @@ class LightRAG:
             for id_, content_data in contents.items()
         }
 
+        # 过滤掉处理过的文档
         # 3. Filter out already processed documents
         # Get docs ids
         all_new_doc_ids = set(new_docs.keys())
         # Exclude IDs of documents that are already enqueued
         unique_new_doc_ids = await self.doc_status.filter_keys(all_new_doc_ids)
 
+        # 处理重复文档 - 使用当前track_id创建可追踪的记录
         # Handle duplicate documents - create trackable records with current track_id
         ignored_ids = list(all_new_doc_ids - unique_new_doc_ids)
         if ignored_ids:
@@ -1475,6 +1477,7 @@ class LightRAG:
                     existing_doc.get("track_id", "") if existing_doc else ""
                 )
 
+                # 使用唯一Id为这次重复的尝试创建一条新纪录
                 # Create a new record with unique ID for this duplicate attempt
                 dup_record_id = compute_mdhash_id(f"{doc_id}-{track_id}", prefix="dup-")
                 duplicate_docs[dup_record_id] = {
@@ -1502,6 +1505,7 @@ class LightRAG:
                     f"Created {len(duplicate_docs)} duplicate document records with track_id: {track_id}"
                 )
 
+        # 新文档
         # Filter new_docs to only include documents with unique IDs
         new_docs = {
             doc_id: new_docs[doc_id]
@@ -1513,6 +1517,7 @@ class LightRAG:
             logger.warning("No new unique documents were found.")
             return
 
+        # 文档内容存入full_docs 状态存入doc_status
         # 4. Store document content in full_docs and status in doc_status
         #    Store full document content separately
         full_docs_data = {

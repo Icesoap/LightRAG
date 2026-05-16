@@ -1579,6 +1579,7 @@ async def pipeline_enqueue_file(
             )
             return False, track_id
 
+        # 通过文件提炼出内容
         # Insert into the RAG queue
         if content:
             # Check if content contains only whitespace characters
@@ -2173,12 +2174,14 @@ def create_document_routes(
             # Sanitize filename to prevent Path Traversal attacks
             safe_filename = sanitize_filename(file.filename, doc_manager.input_dir)
 
+            #检查是否支持的文件格式
             if not doc_manager.is_supported_file(safe_filename):
                 raise HTTPException(
                     status_code=400,
                     detail=f"Unsupported file type. Supported types: {doc_manager.supported_extensions}",
                 )
 
+            #检查文件大小
             # Check file size limit (if configured)
             if (
                 global_args.max_upload_size is not None
@@ -2200,6 +2203,7 @@ def create_document_routes(
                         f"File size not available in UploadFile for {safe_filename}, will check during streaming"
                     )
 
+            # 检查是否存在
             # Check if filename already exists in doc_status storage
             existing_doc_data = await rag.doc_status.get_doc_by_file_path(safe_filename)
             if existing_doc_data:
@@ -2261,6 +2265,7 @@ def create_document_routes(
                     detail=f"File too large. Maximum size: {global_args.max_upload_size / 1024 / 1024:.1f}MB, uploaded: {bytes_written / 1024 / 1024:.1f}MB",
                 )
 
+            # 创建追踪Id
             track_id = generate_track_id("upload")
 
             # Add to background tasks and get track_id

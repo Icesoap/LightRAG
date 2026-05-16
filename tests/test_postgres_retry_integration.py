@@ -1,12 +1,12 @@
 """
 Integration test suite for PostgreSQL retry mechanism using real database.
 
-This test suite connects to a real PostgreSQL database using credentials from .env
+This test suite connects to a real PostgreSQL database using credentials from ..env
 and tests the retry mechanism with actual network failures.
 
 Prerequisites:
 1. PostgreSQL server running and accessible
-2. .env file with POSTGRES_* configuration
+2. ..env file with POSTGRES_* configuration
 3. asyncpg installed: pip install asyncpg
 """
 
@@ -21,7 +21,7 @@ from lightrag.kg.postgres_impl import PostgreSQLDB
 asyncpg = pytest.importorskip("asyncpg")
 
 # Load environment variables
-load_dotenv(dotenv_path=".env", override=False)
+load_dotenv(dotenv_path="..env", override=False)
 
 
 @pytest.mark.integration
@@ -314,7 +314,7 @@ class TestPostgresRetryIntegration:
         assert db.user, "User should be configured"
         assert db.database, "Database should be configured"
 
-        print("\n✅ Test passed: All configuration loaded correctly from .env")
+        print("\n✅ Test passed: All configuration loaded correctly from ..env")
         print("=" * 80)
 
 
@@ -322,13 +322,13 @@ def run_integration_tests():
     """Run all integration tests with detailed output."""
     print("\n" + "=" * 80)
     print("POSTGRESQL RETRY MECHANISM - INTEGRATION TESTS")
-    print("Testing with REAL database from .env configuration")
+    print("Testing with REAL database from ..env configuration")
     print("=" * 80)
 
     # Check if database configuration exists
     if not os.getenv("POSTGRES_HOST"):
-        print("\n⚠️  WARNING: No POSTGRES_HOST in .env file")
-        print("Please ensure .env file exists with PostgreSQL configuration.")
+        print("\n⚠️  WARNING: No POSTGRES_HOST in ..env file")
+        print("Please ensure ..env file exists with PostgreSQL configuration.")
         return
 
     print("\nRunning integration tests...\n")

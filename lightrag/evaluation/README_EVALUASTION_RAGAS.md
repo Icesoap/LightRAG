@@ -230,15 +230,15 @@ Both use different custom OpenAI-compatible endpoints.
 
 **Example 6: Using Environment Variables from .env File**
 ```bash
-# Create .env file in project root
-cat > .env << EOF
+# Create ..env file in project root
+cat > ..env << EOF
 EVAL_LLM_BINDING_API_KEY=your-key
 EVAL_LLM_BINDING_HOST=http://localhost:8000/v1
 EVAL_LLM_MODEL=qwen-plus
 EVAL_EMBEDDING_MODEL=BAAI/bge-m3
 EOF
 
-# Run evaluation (automatically loads .env)
+# Run evaluation (automatically loads ..env)
 python lightrag/evaluation/eval_rag_quality.py
 ```
 

@@ -65,7 +65,7 @@ async def initialize_rag(
     Initializes a LightRAG instance with data isolation.
 
     - entities (if provided) overrides everything
-    - else ENTITY_TYPES env var is used
+    - else ENTITY_TYPES .env var is used
     - else DEFAULT_ENTITY_TYPES is used
     """
 

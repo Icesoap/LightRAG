@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/.env python3
 """
 LLM Query Cache Cleanup Tool for LightRAG
 
@@ -37,7 +37,7 @@ from lightrag.namespace import NameSpace
 from lightrag.utils import setup_logger
 
 # Load environment variables
-load_dotenv(dotenv_path=".env", override=False)
+load_dotenv(dotenv_path="..env", override=False)
 
 # Setup logger
 setup_logger("lightrag", level="INFO")
@@ -128,7 +128,7 @@ class CleanupTool:
     def get_workspace_for_storage(self, storage_name: str) -> str:
         """Get workspace for a specific storage type
 
-        Priority: Storage-specific env var > WORKSPACE env var > empty string
+        Priority: Storage-specific .env var > WORKSPACE .env var > empty string
 
         Args:
             storage_name: Storage implementation name

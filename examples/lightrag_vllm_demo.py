@@ -7,7 +7,7 @@ This example demonstrates how to use LightRAG with:
 - Jina-compatible reranker (also vLLM-served)
 
 Prerequisites:
-    1. Create a .env file or export environment variables:
+    1. Create a ..env file or export environment variables:
        - LLM_MODEL
        - LLM_BINDING_HOST
        - LLM_BINDING_API_KEY

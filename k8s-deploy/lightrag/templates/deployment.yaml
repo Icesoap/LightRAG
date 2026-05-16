@@ -22,7 +22,7 @@ spec:
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
-              containerPort: {{ .Values.env.PORT }}
+              containerPort: {{ .Values..env.PORT }}
               protocol: TCP
           readinessProbe:
             httpGet:
@@ -40,9 +40,9 @@ spec:
               mountPath: /app/data/rag_storage
             - name: inputs
               mountPath: /app/data/inputs
-            - name: env-file
-              mountPath: /app/.env
-              subPath: .env
+            - name: .env-file
+              mountPath: /app/..env
+              subPath: ..env
           {{- $envFrom := default (dict) .Values.envFrom }}
           {{- $envFromEntries := list }}
           {{- range (default (list) (index $envFrom "secrets")) }}
@@ -60,9 +60,9 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       volumes:
-        - name: env-file
+        - name: .env-file
           secret:
-            secretName: {{ include "lightrag.fullname" . }}-env
+            secretName: {{ include "lightrag.fullname" . }}-.env
         {{- if .Values.persistence.enabled }}
         - name: rag-storage
           persistentVolumeClaim:

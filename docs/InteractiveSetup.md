@@ -54,7 +54,7 @@ Use this when you want LightRAG running with the least amount of setup and you a
 **Command**
 
 ```bash
-make env-base
+make .env-base
 ```
 
 **What the wizard asks**
@@ -92,7 +92,7 @@ Use this when you want LightRAG to run local inference services for embedding an
 **Command**
 
 ```bash
-make env-base
+make .env-base
 ```
 
 **Recommended answers**
@@ -126,7 +126,7 @@ Use this when you already have `.env` from `make env-base` and now want to switc
 **Command**
 
 ```bash
-make env-storage
+make .env-storage
 ```
 
 **Prerequisite**
@@ -168,8 +168,8 @@ Use this when you already have `.env` and need to prepare the server for shared 
 **Commands**
 
 ```bash
-make env-server
-make env-security-check
+make .env-server
+make .env-security-check
 ```
 
 **Prerequisite**
@@ -206,7 +206,7 @@ These commands do not walk you through a full setup flow, but they are part of n
 ### Validate The Current Configuration
 
 ```bash
-make env-validate
+make .env-validate
 ```
 
 Use this when you want to confirm that the current `.env` is internally consistent. It reports problems such as missing required values, malformed auth settings, invalid URIs, invalid ports, or missing SSL files.
@@ -214,7 +214,7 @@ Use this when you want to confirm that the current `.env` is internally consiste
 ### Audit Security Before Exposure
 
 ```bash
-make env-security-check
+make .env-security-check
 ```
 
 Use this before exposing LightRAG beyond localhost. It reports risky setups such as missing authentication, weak or missing JWT secrets, unsafe whitelist settings, or unresolved sensitive placeholders.
@@ -222,7 +222,7 @@ Use this before exposing LightRAG beyond localhost. It reports risky setups such
 ### Create A Standalone Backup
 
 ```bash
-make env-backup
+make .env-backup
 ```
 
 Use this when you want a manual backup without running any setup flow.
@@ -268,31 +268,31 @@ The base `docker-compose.yml` remains the general project compose file. The gene
 ### Remote models, local server
 
 ```bash
-make env-base
+make .env-base
 lightrag-server
 ```
 
 ### Remote LLM, local embedding and rerank in Docker
 
 ```bash
-make env-base
+make .env-base
 docker compose -f docker-compose.final.yml up -d
 ```
 
 ### Add storage after the base setup
 
 ```bash
-make env-base
-make env-storage
+make .env-base
+make .env-storage
 docker compose -f docker-compose.final.yml up -d
 ```
 
 ### Add security and SSL before exposure
 
 ```bash
-make env-base
-make env-storage
-make env-server
-make env-security-check
+make .env-base
+make .env-storage
+make .env-server
+make .env-security-check
 docker compose -f docker-compose.final.yml up -d
 ```

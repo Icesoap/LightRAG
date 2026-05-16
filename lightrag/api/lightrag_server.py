@@ -29,7 +29,8 @@ from lightrag.api.utils_api import (
     display_splash_screen,
     check_env_file,
 )
-from .config import (
+# from .config import (
+from lightrag.api.config import (
     global_args,
     update_uvicorn_mode_config,
     get_default_host,
@@ -65,10 +66,11 @@ from lightrag.kg.shared_storage import (
 from fastapi.security import OAuth2PasswordRequestForm
 from lightrag.api.auth import auth_handler
 
-# use the .env that is inside the current folder
-# allows to use different .env file for each lightrag instance
-# the OS environment variables take precedence over the .env file
-load_dotenv(dotenv_path=".env", override=False)
+# use the ..env that is inside the current folder
+# allows to use different ..env file for each lightrag instance
+# the OS environment variables take precedence over the ..env file
+load_dotenv(dotenv_path=r"./.env", override=False)
+print(os.getenv("LLM_MODEL"))
 
 
 webui_title = os.getenv("WEBUI_TITLE")
@@ -341,7 +343,7 @@ def create_app(args):
         if not os.path.exists(args.ssl_keyfile):
             raise Exception(f"SSL key file not found: {args.ssl_keyfile}")
 
-    # Check if API key is provided either through env var or args
+    # Check if API key is provided either through .env var or args
     api_key = os.getenv("LIGHTRAG_API_KEY") or args.key
 
     # Initialize document manager with workspace support for data isolation
@@ -727,7 +729,7 @@ def create_app(args):
             logger.warning(f"Could not import provider function for {binding}: {e}")
 
         # Step 2: Apply priority (user config > provider default)
-        # For max_token_size: explicit env var > provider default > None
+        # For max_token_size: explicit .env var > provider default > None
         final_max_token_size = args.embedding_token_limit or provider_max_token_size
         # For embedding_dim: user config (always has value) takes priority
         # Only use provider default if user config is explicitly None (which shouldn't happen)
@@ -958,7 +960,7 @@ def create_app(args):
         # For OpenAI and other bindings, respect EMBEDDING_SEND_DIM setting
         send_dimensions = embedding_send_dim and has_embedding_dim_param
         if send_dimensions or not embedding_send_dim:
-            dimension_control = "by env var"
+            dimension_control = "by .env var"
         else:
             dimension_control = "by not hasparam"
 
@@ -974,7 +976,7 @@ def create_app(args):
     # Log max_token_size source
     if embedding_func.max_token_size:
         source = (
-            "env variable"
+            ".env variable"
             if args.embedding_token_limit
             else f"{args.embedding_binding} provider default"
         )
@@ -1493,7 +1495,8 @@ def main():
 
     # Explicitly initialize configuration for clarity
     # (The proxy will auto-initialize anyway, but this makes intent clear)
-    from .config import initialize_config
+    from lightrag.api.config import initialize_config
+    # from .config import initialize_config
 
     initialize_config()
 
@@ -1503,7 +1506,7 @@ def main():
         print("Running under Gunicorn - worker management handled by Gunicorn")
         return
 
-    # Check .env file
+    # Check ..env file
     if not check_env_file():
         sys.exit(1)
 
@@ -1546,7 +1549,15 @@ def main():
     print(
         f"Starting Uvicorn server in single-process mode on {global_args.host}:{global_args.port}"
     )
-    uvicorn.run(**uvicorn_config)
+    # uvicorn.run(**uvicorn_config)
+    # 这里报错了 所以注释了上面的代码 使用了AI给的代码
+    if sys.platform == "win32":
+        import asyncio
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        uvicorn.run(**uvicorn_config)
+    else:
+        uvicorn.run(**uvicorn_config)
 
 
 if __name__ == "__main__":

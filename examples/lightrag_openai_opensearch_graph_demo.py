@@ -12,7 +12,7 @@ This example demonstrates how to use LightRAG with:
 Prerequisites:
 1. OpenSearch cluster running and accessible (3.x or higher with k-NN plugin)
 2. Required indices will be auto-created by LightRAG
-3. Set environment variables (example .env):
+3. Set environment variables (example ..env):
 
    OPENSEARCH_HOSTS=localhost:9200
    OPENSEARCH_USER=admin

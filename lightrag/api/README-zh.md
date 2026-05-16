@@ -109,10 +109,10 @@ EMBEDDING_DIM=1024
 除了手动编辑 `env.example` 之外，您还可以使用交互式向导生成配置好的 `.env`，并在需要时生成 `docker-compose.final.yml`：
 
 ```bash
-make env-base           # 必跑第一步：配置 LLM、Embedding、Reranker
-make env-storage        # 可选：配置存储后端和数据库服务
-make env-server         # 可选：配置服务端口、鉴权和 SSL
-make env-security-check # 可选：审计当前 .env 中的安全风险
+make .env-base           # 必跑第一步：配置 LLM、Embedding、Reranker
+make .env-storage        # 可选：配置存储后端和数据库服务
+make .env-server         # 可选：配置服务端口、鉴权和 SSL
+make .env-security-check # 可选：审计当前 ..env 中的安全风险
 ```
 
 每个目标的详细说明请参阅 [docs/InteractiveSetup.md](../../docs/InteractiveSetup.md)。
@@ -643,7 +643,7 @@ LLM_BINDING_HOST=https://api.openai.com/v1
 LLM_BINDING_API_KEY=your-api-key
 
 ### Embedding Configuration (Use valid host. For local services installed with docker, you can use host.docker.internal)
-# see also env.ollama-binding-options.example for fine tuning ollama
+# see also .env.ollama-binding-options.example for fine tuning ollama
 EMBEDDING_MODEL=bge-m3:latest
 EMBEDDING_DIM=1024
 EMBEDDING_BINDING=ollama

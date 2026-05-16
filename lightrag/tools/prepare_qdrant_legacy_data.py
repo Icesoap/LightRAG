@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/.env python3
 """
 Qdrant Legacy Data Preparation Tool for LightRAG
 
@@ -55,7 +55,7 @@ sys.path.insert(
 )
 
 # Load environment variables
-load_dotenv(dotenv_path=".env", override=False)
+load_dotenv(dotenv_path="..env", override=False)
 
 # Ensure qdrant-client is installed
 if not pm.is_installed("qdrant-client"):

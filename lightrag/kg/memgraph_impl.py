@@ -21,8 +21,8 @@ from neo4j.exceptions import TransientError, ResultFailedError
 
 from dotenv import load_dotenv
 
-# use the .env that is inside the current folder
-load_dotenv(dotenv_path=".env", override=False)
+# use the ..env that is inside the current folder
+load_dotenv(dotenv_path="..env", override=False)
 
 MAX_GRAPH_NODES = int(os.getenv("MAX_GRAPH_NODES", 1000))
 
@@ -34,7 +34,7 @@ config.read("config.ini", "utf-8")
 @dataclass
 class MemgraphStorage(BaseGraphStorage):
     def __init__(self, namespace, global_config, embedding_func, workspace=None):
-        # Priority: 1) MEMGRAPH_WORKSPACE env 2) user arg 3) default 'base'
+        # Priority: 1) MEMGRAPH_WORKSPACE .env 2) user arg 3) default 'base'
         memgraph_workspace = os.environ.get("MEMGRAPH_WORKSPACE")
         original_workspace = workspace  # Save original value for logging
         if memgraph_workspace and memgraph_workspace.strip():

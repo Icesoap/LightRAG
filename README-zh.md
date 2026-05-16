@@ -135,10 +135,10 @@ bun install --frozen-lockfile
 bun run build
 cd ..
 
-# 配置 env 文件
-# 从 GitHub 仓库的根目录上下载 env.example 文件
-# 或从本地检出的源代码中获取 env.example 文件
-cp env.example .env  # 使用你的LLM和Embedding模型访问参数更新.env文件
+# 配置 .env 文件
+# 从 GitHub 仓库的根目录上下载 .env.example 文件
+# 或从本地检出的源代码中获取 .env.example 文件
+cp .env.example ..env  # 使用你的LLM和Embedding模型访问参数更新.env文件
 # 启动API-WebUI服务
 lightrag-server
 ```
@@ -166,8 +166,8 @@ bun install --frozen-lockfile
 bun run build
 cd ..
 
-# 配置 env 文件
-cp env.example .env  # 使用你的LLM和Embedding模型访问参数更新.env文件
+# 配置 .env 文件
+cp .env.example ..env  # 使用你的LLM和Embedding模型访问参数更新.env文件
 # 启动API-WebUI服务
 lightrag-server
 ```
@@ -177,8 +177,8 @@ lightrag-server
 ```bash
 git clone https://github.com/HKUDS/LightRAG.git
 cd LightRAG
-cp env.example .env  # 使用你的LLM和Embedding模型访问参数更新.env文件
-# modify LLM and Embedding settings in .env
+cp .env.example ..env  # 使用你的LLM和Embedding模型访问参数更新.env文件
+# modify LLM and Embedding settings in ..env
 docker compose up
 ```
 
@@ -189,12 +189,12 @@ docker compose up
 除了手动编辑 `env.example` 之外，您还可以使用交互式向导生成配置好的 `.env`，并在需要时生成 `docker-compose.final.yml`：
 
 ```bash
-make env-base           # 必跑第一步：配置 LLM、Embedding、Reranker
-make env-storage        # 可选：配置存储后端和数据库服务
-make env-server         # 可选：配置服务端口、鉴权和 SSL
-make env-base-rewrite   # 可选：强制重建向导托管的 compose 服务块
-make env-storage-rewrite # 可选：强制重建向导托管的 compose 服务块
-make env-security-check # 可选：审计当前 .env 中的安全风险
+make .env-base           # 必跑第一步：配置 LLM、Embedding、Reranker
+make .env-storage        # 可选：配置存储后端和数据库服务
+make .env-server         # 可选：配置服务端口、鉴权和 SSL
+make .env-base-rewrite   # 可选：强制重建向导托管的 compose 服务块
+make .env-storage-rewrite # 可选：强制重建向导托管的 compose 服务块
+make .env-security-check # 可选：审计当前 ..env 中的安全风险
 ```
 
 每个目标的详细说明请参阅 [docs/InteractiveSetup.md](./docs/InteractiveSetup.md)。

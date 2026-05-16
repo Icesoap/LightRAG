@@ -31,10 +31,10 @@ from neo4j import (  # type: ignore
 
 from dotenv import load_dotenv
 
-# use the .env that is inside the current folder
-# allows to use different .env file for each lightrag instance
-# the OS environment variables take precedence over the .env file
-load_dotenv(dotenv_path=".env", override=False)
+# use the ..env that is inside the current folder
+# allows to use different ..env file for each lightrag instance
+# the OS environment variables take precedence over the ..env file
+load_dotenv(dotenv_path="..env", override=False)
 
 config = configparser.ConfigParser()
 config.read("config.ini", "utf-8")
@@ -65,13 +65,13 @@ READ_RETRY = retry(
 @dataclass
 class Neo4JStorage(BaseGraphStorage):
     def __init__(self, namespace, global_config, embedding_func, workspace=None):
-        # Read env and override the arg if present
+        # Read .env and override the arg if present
         neo4j_workspace = os.environ.get("NEO4J_WORKSPACE")
         original_workspace = workspace  # Save original value for logging
         if neo4j_workspace and neo4j_workspace.strip():
             workspace = neo4j_workspace
 
-        # Default to 'base' when both arg and env are empty
+        # Default to 'base' when both arg and .env are empty
         if not workspace or not str(workspace).strip():
             workspace = "base"
 

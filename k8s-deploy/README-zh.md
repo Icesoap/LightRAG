@@ -45,18 +45,18 @@ bash ./install_lightrag_dev.sh
 # 您可以覆盖任何想要的环境参数
 helm upgrade --install lightrag ./lightrag \
   --namespace rag \
-  --set-string env.LIGHTRAG_KV_STORAGE=JsonKVStorage \
-  --set-string env.LIGHTRAG_VECTOR_STORAGE=NanoVectorDBStorage \
-  --set-string env.LIGHTRAG_GRAPH_STORAGE=NetworkXStorage \
-  --set-string env.LIGHTRAG_DOC_STATUS_STORAGE=JsonDocStatusStorage \
-  --set-string env.LLM_BINDING=openai \
-  --set-string env.LLM_MODEL=gpt-4o-mini \
-  --set-string env.LLM_BINDING_HOST=$OPENAI_API_BASE \
-  --set-string env.LLM_BINDING_API_KEY=$OPENAI_API_KEY \
-  --set-string env.EMBEDDING_BINDING=openai \
-  --set-string env.EMBEDDING_MODEL=text-embedding-ada-002 \
-  --set-string env.EMBEDDING_DIM=1536 \
-  --set-string env.EMBEDDING_BINDING_API_KEY=$OPENAI_API_KEY
+  --set-string .env.LIGHTRAG_KV_STORAGE=JsonKVStorage \
+  --set-string .env.LIGHTRAG_VECTOR_STORAGE=NanoVectorDBStorage \
+  --set-string .env.LIGHTRAG_GRAPH_STORAGE=NetworkXStorage \
+  --set-string .env.LIGHTRAG_DOC_STATUS_STORAGE=JsonDocStatusStorage \
+  --set-string .env.LLM_BINDING=openai \
+  --set-string .env.LLM_MODEL=gpt-4o-mini \
+  --set-string .env.LLM_BINDING_HOST=$OPENAI_API_BASE \
+  --set-string .env.LLM_BINDING_API_KEY=$OPENAI_API_KEY \
+  --set-string .env.EMBEDDING_BINDING=openai \
+  --set-string .env.EMBEDDING_MODEL=text-embedding-ada-002 \
+  --set-string .env.EMBEDDING_DIM=1536 \
+  --set-string .env.EMBEDDING_BINDING_API_KEY=$OPENAI_API_KEY
 ```
 
 ### 访问应用程序：

@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/.env python3
 """
 Test script: Demonstrates usage of aquery_data FastAPI endpoint
 Query content: Who is the author of LightRAG

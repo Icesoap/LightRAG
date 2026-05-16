@@ -135,10 +135,10 @@ bun install --frozen-lockfile
 bun run build
 cd ..
 
-# Setup env file
-# Obtain the env.example file by downloading it from the GitHub repository root
+# Setup .env file
+# Obtain the .env.example file by downloading it from the GitHub repository root
 # or by copying it from a local source checkout.
-cp env.example .env  # Update the .env with your LLM and embedding configurations
+cp .env.example ..env  # Update the ..env with your LLM and embedding configurations
 # Launch the server
 lightrag-server
 ```
@@ -166,8 +166,8 @@ bun install --frozen-lockfile
 bun run build
 cd ..
 
-# setup env file
-cp env.example .env  # Update the .env with your LLM and embedding configurations
+# setup .env file
+cp .env.example ..env  # Update the ..env with your LLM and embedding configurations
 # Launch API-WebUI server
 lightrag-server
 ```
@@ -177,8 +177,8 @@ lightrag-server
 ```bash
 git clone https://github.com/HKUDS/LightRAG.git
 cd LightRAG
-cp env.example .env  # Update the .env with your LLM and embedding configurations
-# modify LLM and Embedding settings in .env
+cp .env.example ..env  # Update the ..env with your LLM and embedding configurations
+# modify LLM and Embedding settings in ..env
 docker compose up
 ```
 
@@ -189,12 +189,12 @@ docker compose up
 Instead of editing `env.example` by hand, use the interactive setup wizard to generate a configured `.env` and, when needed, `docker-compose.final.yml`:
 
 ```bash
-make env-base           # Required first step: LLM, embedding, reranker
-make env-storage        # Optional: storage backends and database services
-make env-server         # Optional: server port, auth, and SSL
-make env-base-rewrite   # Optional: force-regenerate wizard-managed compose services
-make env-storage-rewrite # Optional: force-regenerate wizard-managed compose services
-make env-security-check # Optional: audit the current .env for security risks
+make .env-base           # Required first step: LLM, embedding, reranker
+make .env-storage        # Optional: storage backends and database services
+make .env-server         # Optional: server port, auth, and SSL
+make .env-base-rewrite   # Optional: force-regenerate wizard-managed compose services
+make .env-storage-rewrite # Optional: force-regenerate wizard-managed compose services
+make .env-security-check # Optional: audit the current ..env for security risks
 ```
 
 For full description of every target see [docs/InteractiveSetup.md](./docs/InteractiveSetup.md).

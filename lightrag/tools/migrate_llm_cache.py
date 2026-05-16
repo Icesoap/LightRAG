@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/.env python3
 """
 LLM Cache Migration Tool for LightRAG
 
@@ -36,10 +36,10 @@ from lightrag.namespace import NameSpace
 from lightrag.utils import setup_logger
 
 # Load environment variables
-# use the .env that is inside the current folder
-# allows to use different .env file for each lightrag instance
-# the OS environment variables take precedence over the .env file
-load_dotenv(dotenv_path=".env", override=False)
+# use the ..env that is inside the current folder
+# allows to use different ..env file for each lightrag instance
+# the OS environment variables take precedence over the ..env file
+load_dotenv(dotenv_path="..env", override=False)
 
 # Setup logger
 setup_logger("lightrag", level="INFO")
@@ -113,7 +113,7 @@ class MigrationTool:
     def get_workspace_for_storage(self, storage_name: str) -> str:
         """Get workspace for a specific storage type
 
-        Priority: Storage-specific env var > WORKSPACE env var > empty string
+        Priority: Storage-specific .env var > WORKSPACE .env var > empty string
 
         Args:
             storage_name: Storage implementation name
@@ -200,7 +200,7 @@ class MigrationTool:
         return True
 
     def count_available_storage_types(self) -> int:
-        """Count available storage types (with env vars, config.ini, or defaults)
+        """Count available storage types (with .env vars, config.ini, or defaults)
 
         Returns:
             Number of available storage types

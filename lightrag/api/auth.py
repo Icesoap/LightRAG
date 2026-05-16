@@ -9,10 +9,10 @@ from ..utils import logger
 from .config import global_args
 from .passwords import verify_password
 
-# use the .env that is inside the current folder
-# allows to use different .env file for each lightrag instance
-# the OS environment variables take precedence over the .env file
-load_dotenv(dotenv_path=".env", override=False)
+# use the ..env that is inside the current folder
+# allows to use different ..env file for each lightrag instance
+# the OS environment variables take precedence over the ..env file
+load_dotenv(dotenv_path="..env", override=False)
 
 
 class TokenPayload(BaseModel):
@@ -27,7 +27,7 @@ class AuthHandler:
         self.secret = global_args.token_secret
         if self.secret == "lightrag-jwt-default-secret-key!":
             logger.warning(
-                "Using default TOKEN_SECRET. Please set a unique TOKEN_SECRET in your .env file for better security."
+                "Using default TOKEN_SECRET. Please set a unique TOKEN_SECRET in your ..env file for better security."
             )
         self.algorithm = global_args.jwt_algorithm
         self.expire_hours = global_args.token_expire_hours

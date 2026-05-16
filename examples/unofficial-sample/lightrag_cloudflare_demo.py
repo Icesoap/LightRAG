@@ -12,8 +12,8 @@ from dotenv import load_dotenv
 
 """This code is a modified version of lightrag_openai_demo.py"""
 
-# ideally, as always, env!
-load_dotenv(dotenv_path=".env", override=False)
+# ideally, as always, .env!
+load_dotenv(dotenv_path="..env", override=False)
 
 
 """    ----========= IMPORTANT CHANGE THIS! =========----    """

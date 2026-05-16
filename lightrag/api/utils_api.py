@@ -43,13 +43,13 @@ _TOKEN_RENEWAL_SKIP_PATHS = [
 
 def check_env_file():
     """
-    Check if .env file exists and handle user confirmation if needed.
+    Check if ..env file exists and handle user confirmation if needed.
     Returns True if should continue, False if should exit.
     """
-    env_path = ".env"
+    env_path = "..env"
 
     if not os.path.exists(env_path):
-        warning_msg = "Warning: Startup directory must contain .env file for multi-instance support."
+        warning_msg = "Warning: Startup directory must contain ..env file for multi-instance support."
         ASCIIColors.yellow(warning_msg)
 
         # Check if running in interactive terminal

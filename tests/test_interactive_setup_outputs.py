@@ -118,7 +118,7 @@ printf 'DOCKER_SERVICE=%s\\n' "${{DOCKER_SERVICES[0]}}"
 def test_collect_postgres_config_uses_rag_defaults_without_prompt_for_empty_docker_credentials() -> (
     None
 ):
-    """Docker PostgreSQL should auto-fill bundled credentials when old `.env` creds are empty."""
+    """Docker PostgreSQL should auto-fill bundled credentials when old `..env` creds are empty."""
 
     values = run_bash_lines(
         f"""
@@ -162,7 +162,7 @@ printf 'PROMPT_LOG=%s\\n' "$(paste -sd '|' "$PROMPT_LOG_FILE")"
 
 
 def test_collect_postgres_config_prompts_for_existing_docker_credentials() -> None:
-    """Docker PostgreSQL should preserve editability when old `.env` creds already exist."""
+    """Docker PostgreSQL should preserve editability when old `..env` creds already exist."""
 
     values = run_bash_lines(
         f"""
@@ -497,9 +497,9 @@ printf 'COMPOSE_RERANK=%s\\n' "${{COMPOSE_ENV_OVERRIDES[RERANK_BINDING_HOST]}}"
 def test_generate_files_keep_host_env_values_and_inject_compose_overrides(
     tmp_path: Path,
 ) -> None:
-    """This generation path keeps host-style values in `.env` and injects compose-only overrides separately."""
+    """This generation path keeps host-style values in `..env` and injects compose-only overrides separately."""
 
-    env_example = tmp_path / "env.example"
+    env_example = tmp_path / ".env.example"
     env_example.write_text(
         "\n".join(
             [
@@ -521,9 +521,9 @@ def test_generate_files_keep_host_env_values_and_inject_compose_overrides(
                 "  lightrag:",
                 "    image: example/lightrag:test",
                 "    env_file:",
-                "      - .env",
+                "      - ..env",
                 "    volumes:",
-                "      - ./.env:/app/.env",
+                "      - ./..env:/app/..env",
             ]
         )
         + "\n",
@@ -551,12 +551,12 @@ SSL_KEY_SOURCE_PATH="{key_path}"
 
 prepare_compose_env_overrides
 stage_ssl_assets "$SSL_CERT_SOURCE_PATH" "$SSL_KEY_SOURCE_PATH"
-generate_env_file "$REPO_ROOT/env.example" "$REPO_ROOT/.env"
+generate_env_file "$REPO_ROOT/.env.example" "$REPO_ROOT/..env"
 generate_docker_compose "$REPO_ROOT/docker-compose.generated.yml"
 """
     )
 
-    generated_env = (tmp_path / ".env").read_text(encoding="utf-8")
+    generated_env = (tmp_path / "..env").read_text(encoding="utf-8")
     generated_compose = (tmp_path / "docker-compose.generated.yml").read_text(
         encoding="utf-8"
     )
@@ -596,9 +596,9 @@ def test_generate_docker_compose_removes_lightrag_env_file_to_preserve_dollar_va
             "    container_name: lightrag",
             "    image: example/lightrag:test",
             "    env_file:",
-            "      - .env",
+            "      - ..env",
             "    volumes:",
-            "      - ./.env:/app/.env",
+            "      - ./..env:/app/..env",
         ],
     )
 
@@ -620,7 +620,7 @@ generate_docker_compose "$REPO_ROOT/docker-compose.generated.yml"
     assert "env_file:" not in generated_compose
     assert "environment:" not in generated_compose
     assert "container_name:" not in generated_compose
-    assert "- ./.env:/app/.env" in generated_compose
+    assert "- ./..env:/app/..env" in generated_compose
 
 
 def test_generate_docker_compose_removes_lightrag_container_name_from_existing_output(
@@ -673,8 +673,8 @@ def test_generate_docker_compose_preserves_list_style_lightrag_environment(
         ],
     )
     write_text_lines(
-        tmp_path / "env.example",
-        (REPO_ROOT / "env.example").read_text(encoding="utf-8").splitlines(),
+        tmp_path / ".env.example",
+        (REPO_ROOT / ".env.example").read_text(encoding="utf-8").splitlines(),
     )
 
     run_bash(
@@ -711,8 +711,8 @@ def test_generate_docker_compose_injects_healthchecks_and_lightrag_depends_on(
         ],
     )
     write_text_lines(
-        tmp_path / "env.example",
-        (REPO_ROOT / "env.example").read_text(encoding="utf-8").splitlines(),
+        tmp_path / ".env.example",
+        (REPO_ROOT / ".env.example").read_text(encoding="utf-8").splitlines(),
     )
 
     run_bash(
@@ -794,8 +794,8 @@ def test_generate_docker_compose_preserves_user_depends_on_and_removes_stale_man
         ],
     )
     write_text_lines(
-        tmp_path / "env.example",
-        (REPO_ROOT / "env.example").read_text(encoding="utf-8").splitlines(),
+        tmp_path / ".env.example",
+        (REPO_ROOT / ".env.example").read_text(encoding="utf-8").splitlines(),
     )
 
     run_bash(
@@ -847,8 +847,8 @@ def test_generate_docker_compose_repairs_misplaced_lightrag_depends_on_from_exis
         ],
     )
     write_text_lines(
-        tmp_path / "env.example",
-        (REPO_ROOT / "env.example").read_text(encoding="utf-8").splitlines(),
+        tmp_path / ".env.example",
+        (REPO_ROOT / ".env.example").read_text(encoding="utf-8").splitlines(),
     )
 
     run_bash(
@@ -897,8 +897,8 @@ def test_generate_docker_compose_normalizes_lightrag_restart_policy_from_existin
         ],
     )
     write_text_lines(
-        tmp_path / "env.example",
-        (REPO_ROOT / "env.example").read_text(encoding="utf-8").splitlines(),
+        tmp_path / ".env.example",
+        (REPO_ROOT / ".env.example").read_text(encoding="utf-8").splitlines(),
     )
 
     run_bash(
@@ -944,8 +944,8 @@ def test_generate_docker_compose_normalizes_lightrag_restart_policy_without_blan
         ],
     )
     write_text_lines(
-        tmp_path / "env.example",
-        (REPO_ROOT / "env.example").read_text(encoding="utf-8").splitlines(),
+        tmp_path / ".env.example",
+        (REPO_ROOT / ".env.example").read_text(encoding="utf-8").splitlines(),
     )
 
     run_bash(
@@ -969,7 +969,7 @@ generate_docker_compose "$REPO_ROOT/docker-compose.final.yml"
 
 
 def test_existing_ssl_env_keeps_compose_mount_overrides(tmp_path: Path) -> None:
-    """Compose regeneration should preserve working SSL mounts without implying `.env` is permanently dual-purpose."""
+    """Compose regeneration should preserve working SSL mounts without implying `..env` is permanently dual-purpose."""
 
     compose_file = tmp_path / "docker-compose.yml"
     compose_file.write_text(
@@ -979,7 +979,7 @@ def test_existing_ssl_env_keeps_compose_mount_overrides(tmp_path: Path) -> None:
                 "  lightrag:",
                 "    image: example/lightrag:test",
                 "    env_file:",
-                "      - .env",
+                "      - ..env",
             ]
         )
         + "\n",
@@ -989,7 +989,7 @@ def test_existing_ssl_env_keeps_compose_mount_overrides(tmp_path: Path) -> None:
     cert_path.write_text("cert", encoding="utf-8")
     key_path = tmp_path / "key.pem"
     key_path.write_text("key", encoding="utf-8")
-    env_file = tmp_path / ".env"
+    env_file = tmp_path / "..env"
     env_file.write_text(
         "\n".join(
             [
@@ -1036,7 +1036,7 @@ def test_finalize_base_setup_rewrites_ssl_env_to_preserved_compose_paths(
     (staged_dir / "server.key").write_text("key", encoding="utf-8")
 
     write_text_lines(
-        tmp_path / ".env",
+        tmp_path / "..env",
         [
             "SSL=true",
             "SSL_CERTFILE=/missing/original-cert.pem",
@@ -1048,8 +1048,8 @@ def test_finalize_base_setup_rewrites_ssl_env_to_preserved_compose_paths(
         ],
     )
     write_text_lines(
-        tmp_path / "env.example",
-        (REPO_ROOT / "env.example").read_text(encoding="utf-8").splitlines(),
+        tmp_path / ".env.example",
+        (REPO_ROOT / ".env.example").read_text(encoding="utf-8").splitlines(),
     )
     write_text_lines(
         tmp_path / "docker-compose.final.yml",
@@ -1058,7 +1058,7 @@ def test_finalize_base_setup_rewrites_ssl_env_to_preserved_compose_paths(
             "  lightrag:",
             "    image: example/lightrag:test",
             "    volumes:",
-            "      - ./.env:/app/.env",
+            "      - ./..env:/app/..env",
             "      - ./data/certs/server.pem:/app/data/certs/server.pem:ro",
             "      - ./data/certs/server.key:/app/data/certs/server.key:ro",
             "    environment:",
@@ -1095,7 +1095,7 @@ fi
 """
     )
     values = parse_lines(output)
-    generated_env = (tmp_path / ".env").read_text(encoding="utf-8")
+    generated_env = (tmp_path / "..env").read_text(encoding="utf-8")
 
     assert "SSL_CERTFILE=/app/data/certs/server.pem" in generated_env
     assert "SSL_KEYFILE=/app/data/certs/server.key" in generated_env
@@ -1127,8 +1127,8 @@ def test_removing_ssl_strips_wizard_bind_mounts_from_compose(tmp_path: Path) -> 
         + "\n",
         encoding="utf-8",
     )
-    (tmp_path / "env.example").write_text(
-        (REPO_ROOT / "env.example").read_text(encoding="utf-8"),
+    (tmp_path / ".env.example").write_text(
+        (REPO_ROOT / ".env.example").read_text(encoding="utf-8"),
         encoding="utf-8",
     )
 
@@ -1185,8 +1185,8 @@ def test_generate_docker_compose_preserves_non_managed_named_volumes(
         ],
     )
     write_text_lines(
-        tmp_path / "env.example",
-        (REPO_ROOT / "env.example").read_text(encoding="utf-8").splitlines(),
+        tmp_path / ".env.example",
+        (REPO_ROOT / ".env.example").read_text(encoding="utf-8").splitlines(),
     )
 
     run_bash(
@@ -1222,7 +1222,7 @@ def test_generate_docker_compose_inserts_managed_services_before_top_level_secti
             "  lightrag:",
             "    image: example/lightrag:test",
             "    volumes:",
-            "      - ./.env:/app/.env",
+            "      - ./..env:/app/..env",
             "  worker:",
             "    image: example/worker:test",
             "    networks:",
@@ -1233,8 +1233,8 @@ def test_generate_docker_compose_inserts_managed_services_before_top_level_secti
         ],
     )
     write_text_lines(
-        tmp_path / "env.example",
-        (REPO_ROOT / "env.example").read_text(encoding="utf-8").splitlines(),
+        tmp_path / ".env.example",
+        (REPO_ROOT / ".env.example").read_text(encoding="utf-8").splitlines(),
     )
 
     run_bash(
@@ -1293,8 +1293,8 @@ def test_generate_docker_compose_cleans_marker_and_blank_lines_when_only_lightra
         ],
     )
     write_text_lines(
-        tmp_path / "env.example",
-        (REPO_ROOT / "env.example").read_text(encoding="utf-8").splitlines(),
+        tmp_path / ".env.example",
+        (REPO_ROOT / ".env.example").read_text(encoding="utf-8").splitlines(),
     )
 
     run_bash(
@@ -1334,8 +1334,8 @@ def test_generate_docker_compose_keeps_blank_line_between_managed_service_and_to
         ],
     )
     write_text_lines(
-        tmp_path / "env.example",
-        (REPO_ROOT / "env.example").read_text(encoding="utf-8").splitlines(),
+        tmp_path / ".env.example",
+        (REPO_ROOT / ".env.example").read_text(encoding="utf-8").splitlines(),
     )
 
     run_bash(
@@ -1376,8 +1376,8 @@ def test_generate_docker_compose_keeps_single_blank_line_before_generated_volume
         ],
     )
     write_text_lines(
-        tmp_path / "env.example",
-        (REPO_ROOT / "env.example").read_text(encoding="utf-8").splitlines(),
+        tmp_path / ".env.example",
+        (REPO_ROOT / ".env.example").read_text(encoding="utf-8").splitlines(),
     )
 
     run_bash(
@@ -1405,7 +1405,7 @@ def test_find_generated_compose_file_prefers_legacy_profile_match(
     """Legacy setup profile metadata should steer compose migration when available."""
 
     write_text_lines(
-        tmp_path / ".env",
+        tmp_path / "..env",
         [
             "LIGHTRAG_SETUP_PROFILE=production",
             "HOST=0.0.0.0",
@@ -1447,7 +1447,7 @@ def test_find_generated_compose_file_falls_back_to_order_without_profile(
 ) -> None:
     """Without legacy profile metadata, compose migration should use the default order."""
 
-    write_text_lines(tmp_path / ".env", ["HOST=0.0.0.0"])
+    write_text_lines(tmp_path / "..env", ["HOST=0.0.0.0"])
     write_text_lines(
         tmp_path / "docker-compose.development.yml",
         [
@@ -1486,7 +1486,7 @@ def test_collect_ssl_config_can_disable_loaded_ssl_values(tmp_path: Path) -> Non
     cert_path.write_text("cert", encoding="utf-8")
     key_path = tmp_path / "key.pem"
     key_path.write_text("key", encoding="utf-8")
-    env_file = tmp_path / ".env"
+    env_file = tmp_path / "..env"
     env_file.write_text(
         "\n".join(
             [
@@ -1530,7 +1530,7 @@ printf 'SSL_KEY_SOURCE_PATH=%s\\n' "$SSL_KEY_SOURCE_PATH"
 def test_validate_env_file_rejects_missing_ssl_files(tmp_path: Path) -> None:
     """Validation should fail when SSL is enabled with missing cert/key paths."""
 
-    env_file = tmp_path / ".env"
+    env_file = tmp_path / "..env"
     env_file.write_text(
         "\n".join(
             [
@@ -1572,13 +1572,13 @@ validate_env_file
 def test_validate_env_file_rejects_container_ssl_paths_for_host_target(
     tmp_path: Path,
 ) -> None:
-    """host-target .env must not accept /app/data/certs/* even when the staged file exists."""
+    """host-target ..env must not accept /app/data/certs/* even when the staged file exists."""
 
     (tmp_path / "data" / "certs").mkdir(parents=True)
     (tmp_path / "data" / "certs" / "cert.pem").write_text("cert", encoding="utf-8")
     (tmp_path / "data" / "certs" / "key.pem").write_text("key", encoding="utf-8")
 
-    env_file = tmp_path / ".env"
+    env_file = tmp_path / "..env"
     env_file.write_text(
         "\n".join(
             [
@@ -1627,7 +1627,7 @@ def test_validate_env_file_rejects_container_ssl_paths_for_default_host_target(
     (tmp_path / "data" / "certs" / "cert.pem").write_text("cert", encoding="utf-8")
     (tmp_path / "data" / "certs" / "key.pem").write_text("key", encoding="utf-8")
 
-    env_file = tmp_path / ".env"
+    env_file = tmp_path / "..env"
     env_file.write_text(
         "\n".join(
             [
@@ -1669,13 +1669,13 @@ validate_env_file
 def test_validate_env_file_accepts_container_ssl_paths_for_compose_target(
     tmp_path: Path,
 ) -> None:
-    """compose-target .env may use /app/data/certs/* when the staged files exist."""
+    """compose-target ..env may use /app/data/certs/* when the staged files exist."""
 
     (tmp_path / "data" / "certs").mkdir(parents=True)
     (tmp_path / "data" / "certs" / "cert.pem").write_text("cert", encoding="utf-8")
     (tmp_path / "data" / "certs" / "key.pem").write_text("key", encoding="utf-8")
 
-    env_file = tmp_path / ".env"
+    env_file = tmp_path / "..env"
     env_file.write_text(
         "\n".join(
             [
@@ -1730,11 +1730,11 @@ ENV_VALUES[EMBEDDING_MODEL]="bge-m3:latest"
 ENV_VALUES[EMBEDDING_DIM]="1024"
 ENV_VALUES[EMBEDDING_BINDING_HOST]="http://localhost:11434"
 
-generate_env_file "{REPO_ROOT}/env.example" "$REPO_ROOT/.env"
+generate_env_file "{REPO_ROOT}/.env.example" "$REPO_ROOT/..env"
 """
     )
 
-    generated_env = (tmp_path / ".env").read_text(encoding="utf-8").splitlines()
+    generated_env = (tmp_path / "..env").read_text(encoding="utf-8").splitlines()
     active_embedding_lines = [
         line for line in generated_env if line.startswith("EMBEDDING_BINDING=")
     ]
@@ -1756,7 +1756,7 @@ def test_generate_env_file_round_trips_dollar_signs_in_single_quoted_values(
 ) -> None:
     """Quoted values containing `$` should survive generate/load cycles unchanged."""
 
-    env_example = tmp_path / "env.example"
+    env_example = tmp_path / ".env.example"
     env_example.write_text(
         "\n".join(
             [
@@ -1780,9 +1780,9 @@ ENV_VALUES[TOKEN_SECRET]='abc$HOME'
 ENV_VALUES[LIGHTRAG_API_KEY]='plain$token'
 ENV_VALUES[WEBUI_DESCRIPTION]='value with "$PATH" and $HOME'
 
-generate_env_file "$REPO_ROOT/env.example" "$REPO_ROOT/.env"
+generate_env_file "$REPO_ROOT/.env.example" "$REPO_ROOT/..env"
 reset_state
-load_env_file "$REPO_ROOT/.env"
+load_env_file "$REPO_ROOT/..env"
 
 printf 'TOKEN_SECRET=%s\\n' "${{ENV_VALUES[TOKEN_SECRET]}}"
 printf 'LIGHTRAG_API_KEY=%s\\n' "${{ENV_VALUES[LIGHTRAG_API_KEY]}}"
@@ -1790,7 +1790,7 @@ printf 'WEBUI_DESCRIPTION=%s\\n' "${{ENV_VALUES[WEBUI_DESCRIPTION]}}"
 """
     )
     values = parse_lines(output)
-    generated_env = (tmp_path / ".env").read_text(encoding="utf-8")
+    generated_env = (tmp_path / "..env").read_text(encoding="utf-8")
 
     assert "TOKEN_SECRET='abc$HOME'" in generated_env
     assert "LIGHTRAG_API_KEY='plain$token'" in generated_env
@@ -1805,7 +1805,7 @@ def test_generate_env_file_avoids_double_quotes_for_compose_sensitive_strings(
 ) -> None:
     """Setup output should avoid double quotes for affected string variables."""
 
-    env_example = tmp_path / "env.example"
+    env_example = tmp_path / ".env.example"
     env_example.write_text(
         "\n".join(
             [
@@ -1835,11 +1835,11 @@ ENV_VALUES[LANGFUSE_SECRET_KEY]='sk-lf-secret'
 ENV_VALUES[LANGFUSE_PUBLIC_KEY]='pk-lf-public'
 ENV_VALUES[LANGFUSE_HOST]='https://langfuse.example'
 
-generate_env_file "$REPO_ROOT/env.example" "$REPO_ROOT/.env"
+generate_env_file "$REPO_ROOT/.env.example" "$REPO_ROOT/..env"
 """
     )
 
-    generated_lines = (tmp_path / ".env").read_text(encoding="utf-8").splitlines()
+    generated_lines = (tmp_path / "..env").read_text(encoding="utf-8").splitlines()
 
     assert "WEBUI_TITLE='My Graph KB'" in generated_lines
     assert (
@@ -1920,7 +1920,7 @@ def test_collect_provider_config_clears_stale_api_key_for_bedrock(
 ) -> None:
     """Switching a provider to Bedrock should remove stale API-key settings."""
 
-    write_text_lines(tmp_path / ".env", env_lines)
+    write_text_lines(tmp_path / "..env", env_lines)
 
     output = run_bash(
         f"""
@@ -2098,7 +2098,7 @@ def test_collect_provider_config_preserves_supported_binding_on_rerun(
 ) -> None:
     """Reruns should preserve supported provider bindings and their saved settings."""
 
-    write_text_lines(tmp_path / ".env", env_lines)
+    write_text_lines(tmp_path / "..env", env_lines)
 
     output = run_bash(
         f"""
@@ -2134,7 +2134,7 @@ def test_collect_embedding_config_forces_ollama_for_openai_ollama_llm(
     """`openai-ollama` should not preserve a conflicting embedding provider."""
 
     write_text_lines(
-        tmp_path / ".env",
+        tmp_path / "..env",
         [
             "LLM_BINDING=openai-ollama",
             "EMBEDDING_BINDING=openai",
@@ -2210,10 +2210,10 @@ printf 'AWS_REGION_SET=%s\\n' "${{ENV_VALUES[AWS_REGION]+set}}"
 def test_switching_both_providers_off_bedrock_clears_saved_aws_credentials(
     tmp_path: Path,
 ) -> None:
-    """Reruns should not keep stale AWS Bedrock secrets in regenerated `.env` files."""
+    """Reruns should not keep stale AWS Bedrock secrets in regenerated `..env` files."""
 
     write_text_lines(
-        tmp_path / ".env",
+        tmp_path / "..env",
         [
             "LLM_BINDING=aws_bedrock",
             "LLM_MODEL=anthropic.claude-3-5-sonnet-20241022-v2:0",
@@ -2229,7 +2229,7 @@ def test_switching_both_providers_off_bedrock_clears_saved_aws_credentials(
         ],
     )
     write_text_lines(
-        tmp_path / "env.example",
+        tmp_path / ".env.example",
         [
             "# AWS_ACCESS_KEY_ID=your_aws_access_key_id",
             "# AWS_SECRET_ACCESS_KEY=your_aws_secret_access_key",
@@ -2261,7 +2261,7 @@ prompt_secret_until_valid_with_default() {{ printf 'fresh-key'; }}
 
 collect_llm_config
 collect_embedding_config
-generate_env_file "$REPO_ROOT/env.example" "$REPO_ROOT/.env.generated"
+generate_env_file "$REPO_ROOT/.env.example" "$REPO_ROOT/..env.generated"
 
 printf 'AWS_ACCESS_KEY_ID_SET=%s\\n' "${{ENV_VALUES[AWS_ACCESS_KEY_ID]+set}}"
 printf 'AWS_SECRET_ACCESS_KEY_SET=%s\\n' "${{ENV_VALUES[AWS_SECRET_ACCESS_KEY]+set}}"
@@ -2271,7 +2271,7 @@ printf 'AWS_REGION_SET=%s\\n' "${{ENV_VALUES[AWS_REGION]+set}}"
     )
     values = parse_lines(output)
     generated_lines = (
-        (tmp_path / ".env.generated").read_text(encoding="utf-8").splitlines()
+        (tmp_path / "..env.generated").read_text(encoding="utf-8").splitlines()
     )
 
     assert values["AWS_ACCESS_KEY_ID_SET"] == ""
@@ -2292,7 +2292,7 @@ def test_collect_rerank_config_preserves_api_key_when_disabled(
     """Disabling reranking should preserve credentials so they survive re-enable."""
 
     write_text_lines(
-        tmp_path / ".env",
+        tmp_path / "..env",
         [
             "RERANK_BINDING=cohere",
             "RERANK_MODEL=rerank-v3.5",
@@ -2334,7 +2334,7 @@ def test_load_existing_env_forces_cohere_binding_for_vllm_rerank(
     """Loading a Docker-managed vLLM rerank config should normalize the binding to cohere."""
 
     write_text_lines(
-        tmp_path / ".env",
+        tmp_path / "..env",
         [
             "RERANK_BINDING=jina",
             "LIGHTRAG_SETUP_RERANK_PROVIDER=vllm",
@@ -2496,7 +2496,7 @@ def test_generate_docker_compose_escapes_dollar_signs_in_overrides_and_service_s
             "  lightrag:",
             "    image: example/lightrag:test",
             "    env_file:",
-            "      - .env",
+            "      - ..env",
         ],
     )
 
@@ -2558,9 +2558,9 @@ generate_docker_compose "$REPO_ROOT/docker-compose.generated.yml"
 def test_env_base_flow_preserves_non_inference_env_values(
     tmp_path: Path,
 ) -> None:
-    """env-base wizard should leave server, security, and observability values untouched."""
+    """.env-base wizard should leave server, security, and observability values untouched."""
 
-    env_file = tmp_path / ".env"
+    env_file = tmp_path / "..env"
     env_file.write_text(
         "\n".join(
             [
@@ -2626,7 +2626,7 @@ env_base_flow
     assert values["LLM_BINDING"] == "openai"
     assert values["LLM_BINDING_API_KEY"] == "sk-existing"
     assert values["EMBEDDING_BINDING_API_KEY"] == "sk-existing"
-    # env-base does not touch server / security / observability values
+    # .env-base does not touch server / security / observability values
     assert values["SSL_SET"] == "set"
     assert values["AUTH_ACCOUNTS_SET"] == "set"
     assert values["TOKEN_SECRET_SET"] == "set"
@@ -2638,9 +2638,9 @@ env_base_flow
 def test_env_base_flow_preserves_existing_provider_bindings_on_rerun(
     tmp_path: Path,
 ) -> None:
-    """Rerunning env-base should keep prior LLM and embedding provider settings."""
+    """Rerunning .env-base should keep prior LLM and embedding provider settings."""
 
-    env_file = tmp_path / ".env"
+    env_file = tmp_path / "..env"
     env_file.write_text(
         "\n".join(
             [
@@ -2698,10 +2698,10 @@ env_base_flow
 def test_env_base_flow_preserves_existing_vllm_embedding_settings_on_rerun(
     tmp_path: Path,
 ) -> None:
-    """Rerunning env-base should keep saved local vLLM embedding settings."""
+    """Rerunning .env-base should keep saved local vLLM embedding settings."""
 
     write_text_lines(
-        tmp_path / ".env",
+        tmp_path / "..env",
         [
             "LLM_BINDING=openai",
             "LLM_MODEL=gpt-4o-mini",
@@ -2763,7 +2763,7 @@ def test_env_base_flow_resets_remote_embedding_host_when_switching_to_vllm(
     """Switching a remote embedding provider to local vLLM should restore localhost."""
 
     write_text_lines(
-        tmp_path / ".env",
+        tmp_path / "..env",
         [
             "LLM_BINDING=openai",
             "LLM_MODEL=gpt-4o-mini",
@@ -2817,7 +2817,7 @@ def test_env_base_flow_preserves_existing_vllm_embedding_device_on_gpu_host(
     """Saved vLLM embedding CPU/GPU mode should win over auto-detected GPU defaults."""
 
     write_text_lines(
-        tmp_path / ".env",
+        tmp_path / "..env",
         [
             "LLM_BINDING=openai",
             "LLM_MODEL=gpt-4o-mini",
@@ -2869,10 +2869,10 @@ env_base_flow
 def test_env_base_flow_preserves_existing_vllm_embedding_cuda_device_on_rerun(
     tmp_path: Path,
 ) -> None:
-    """Saved vLLM embedding CUDA mode should survive env-base reruns."""
+    """Saved vLLM embedding CUDA mode should survive .env-base reruns."""
 
     write_text_lines(
-        tmp_path / ".env",
+        tmp_path / "..env",
         [
             "LLM_BINDING=openai",
             "LLM_MODEL=gpt-4o-mini",
@@ -2961,7 +2961,7 @@ env_base_flow
 
 
 def test_env_base_flow_preserves_ssl_config_on_rerun(tmp_path: Path) -> None:
-    """env-base should preserve SSL config on rerun, even when old paths are stale."""
+    """.env-base should preserve SSL config on rerun, even when old paths are stale."""
 
     cases = {
         "stale-paths": [
@@ -2982,10 +2982,10 @@ def test_env_base_flow_preserves_ssl_config_on_rerun(tmp_path: Path) -> None:
         case_dir = tmp_path / case_name
         case_dir.mkdir()
         write_text_lines(
-            case_dir / "env.example",
-            (REPO_ROOT / "env.example").read_text(encoding="utf-8").splitlines(),
+            case_dir / ".env.example",
+            (REPO_ROOT / ".env.example").read_text(encoding="utf-8").splitlines(),
         )
-        write_text_lines(case_dir / ".env", env_lines)
+        write_text_lines(case_dir / "..env", env_lines)
 
         run_bash(
             f"""
@@ -3010,7 +3010,7 @@ env_base_flow
 """
         )
 
-        generated_lines = (case_dir / ".env").read_text(encoding="utf-8").splitlines()
+        generated_lines = (case_dir / "..env").read_text(encoding="utf-8").splitlines()
         for line in env_lines:
             assert line in generated_lines
 
@@ -3018,14 +3018,14 @@ env_base_flow
 def test_env_base_flow_preserves_existing_compose_ssl_when_env_paths_are_stale(
     tmp_path: Path,
 ) -> None:
-    """env-base should keep compose SSL wiring when inherited source paths no longer exist."""
+    """.env-base should keep compose SSL wiring when inherited source paths no longer exist."""
 
     write_text_lines(
-        tmp_path / "env.example",
-        (REPO_ROOT / "env.example").read_text(encoding="utf-8").splitlines(),
+        tmp_path / ".env.example",
+        (REPO_ROOT / ".env.example").read_text(encoding="utf-8").splitlines(),
     )
     write_text_lines(
-        tmp_path / ".env",
+        tmp_path / "..env",
         [
             "SSL=true",
             "SSL_CERTFILE=/missing/cert.pem",
@@ -3096,7 +3096,7 @@ def test_finalize_base_setup_uses_compose_native_storage_endpoints_on_rerun(
     """Preserved managed storage services should inject compose-native endpoints on base reruns."""
 
     write_text_lines(
-        tmp_path / ".env",
+        tmp_path / "..env",
         [
             "LIGHTRAG_RUNTIME_TARGET=compose",
             "LIGHTRAG_SETUP_NEO4J_DEPLOYMENT=docker",
@@ -3110,8 +3110,8 @@ def test_finalize_base_setup_uses_compose_native_storage_endpoints_on_rerun(
         ],
     )
     write_text_lines(
-        tmp_path / "env.example",
-        (REPO_ROOT / "env.example").read_text(encoding="utf-8").splitlines(),
+        tmp_path / ".env.example",
+        (REPO_ROOT / ".env.example").read_text(encoding="utf-8").splitlines(),
     )
     write_text_lines(
         tmp_path / "docker-compose.final.yml",
@@ -3164,10 +3164,10 @@ finalize_base_setup
 def test_finalize_base_setup_drops_stale_storage_services_missing_from_env_markers(
     tmp_path: Path,
 ) -> None:
-    """env-base should treat storage Docker state in `.env` as authoritative."""
+    """.env-base should treat storage Docker state in `..env` as authoritative."""
 
     write_text_lines(
-        tmp_path / ".env",
+        tmp_path / "..env",
         [
             "LIGHTRAG_RUNTIME_TARGET=compose",
             "LLM_BINDING=openai",
@@ -3186,8 +3186,8 @@ def test_finalize_base_setup_drops_stale_storage_services_missing_from_env_marke
         ],
     )
     write_text_lines(
-        tmp_path / "env.example",
-        (REPO_ROOT / "env.example").read_text(encoding="utf-8").splitlines(),
+        tmp_path / ".env.example",
+        (REPO_ROOT / ".env.example").read_text(encoding="utf-8").splitlines(),
     )
     write_text_lines(
         tmp_path / "docker-compose.final.yml",
@@ -3222,7 +3222,7 @@ finalize_base_setup
     )
 
     result = (tmp_path / "docker-compose.final.yml").read_text(encoding="utf-8")
-    generated_env = (tmp_path / ".env").read_text(encoding="utf-8")
+    generated_env = (tmp_path / "..env").read_text(encoding="utf-8")
 
     assert "  lightrag:" in result
     assert "  redis:" not in result
@@ -3235,7 +3235,7 @@ finalize_base_setup
 def test_env_base_flow_backs_up_legacy_generated_compose_before_rewrite(
     tmp_path: Path,
 ) -> None:
-    """env-base should back up the active legacy compose file before regenerating final output."""
+    """.env-base should back up the active legacy compose file before regenerating final output."""
 
     legacy_compose = (
         "\n".join(
@@ -3249,11 +3249,11 @@ def test_env_base_flow_backs_up_legacy_generated_compose_before_rewrite(
     )
 
     write_text_lines(
-        tmp_path / "env.example",
-        (REPO_ROOT / "env.example").read_text(encoding="utf-8").splitlines(),
+        tmp_path / ".env.example",
+        (REPO_ROOT / ".env.example").read_text(encoding="utf-8").splitlines(),
     )
     write_text_lines(
-        tmp_path / ".env",
+        tmp_path / "..env",
         [
             "LIGHTRAG_SETUP_PROFILE=production",
             "LLM_BINDING=openai",
@@ -3311,7 +3311,7 @@ env_base_flow
 def test_env_base_flow_deletes_compose_when_switching_lightrag_to_host(
     tmp_path: Path,
 ) -> None:
-    """env-base should back up and delete compose when no Docker services remain."""
+    """.env-base should back up and delete compose when no Docker services remain."""
 
     existing_compose = (
         "\n".join(
@@ -3327,11 +3327,11 @@ def test_env_base_flow_deletes_compose_when_switching_lightrag_to_host(
     )
 
     write_text_lines(
-        tmp_path / "env.example",
-        (REPO_ROOT / "env.example").read_text(encoding="utf-8").splitlines(),
+        tmp_path / ".env.example",
+        (REPO_ROOT / ".env.example").read_text(encoding="utf-8").splitlines(),
     )
     write_text_lines(
-        tmp_path / ".env",
+        tmp_path / "..env",
         [
             "LIGHTRAG_RUNTIME_TARGET=compose",
             "LLM_BINDING=openai",
@@ -3381,12 +3381,12 @@ env_base_flow
 
     assert_single_compose_backup(tmp_path, existing_compose)
     assert not (tmp_path / "docker-compose.final.yml").exists()
-    generated_env = (tmp_path / ".env").read_text(encoding="utf-8")
+    generated_env = (tmp_path / "..env").read_text(encoding="utf-8")
     assert "LIGHTRAG_RUNTIME_TARGET=host" in generated_env
 
 
 def test_env_base_flow_generates_env_and_compose_files(tmp_path: Path) -> None:
-    """env-base should generate `.env` and docker-compose output for hosted and local providers."""
+    """.env-base should generate `..env` and docker-compose output for hosted and local providers."""
 
     cases = {
         "openai": {
@@ -3427,8 +3427,8 @@ prompt_choice() {
         case_dir = tmp_path / case_name
         case_dir.mkdir()
         write_text_lines(
-            case_dir / "env.example",
-            (REPO_ROOT / "env.example").read_text(encoding="utf-8").splitlines(),
+            case_dir / ".env.example",
+            (REPO_ROOT / ".env.example").read_text(encoding="utf-8").splitlines(),
         )
         write_text_lines(
             case_dir / "docker-compose.yml",
@@ -3465,7 +3465,7 @@ env_base_flow
 """
         )
 
-        generated_env = (case_dir / ".env").read_text(encoding="utf-8")
+        generated_env = (case_dir / "..env").read_text(encoding="utf-8")
         generated_compose = (case_dir / "docker-compose.final.yml").read_text(
             encoding="utf-8"
         )
@@ -3485,11 +3485,11 @@ env_base_flow
 def test_env_base_flow_generates_validatable_env_on_clean_checkout(
     tmp_path: Path,
 ) -> None:
-    """Fresh env-base output should include default storage selections and pass validation."""
+    """Fresh .env-base output should include default storage selections and pass validation."""
 
     write_text_lines(
-        tmp_path / "env.example",
-        (REPO_ROOT / "env.example").read_text(encoding="utf-8").splitlines(),
+        tmp_path / ".env.example",
+        (REPO_ROOT / ".env.example").read_text(encoding="utf-8").splitlines(),
     )
 
     run_bash(
@@ -3521,7 +3521,7 @@ validate_env_file
 """
     )
 
-    generated_env = (tmp_path / ".env").read_text(encoding="utf-8")
+    generated_env = (tmp_path / "..env").read_text(encoding="utf-8")
     assert "LIGHTRAG_KV_STORAGE=JsonKVStorage" in generated_env
     assert "LIGHTRAG_VECTOR_STORAGE=NanoVectorDBStorage" in generated_env
     assert "LIGHTRAG_GRAPH_STORAGE=NetworkXStorage" in generated_env
@@ -3531,10 +3531,10 @@ validate_env_file
 
 
 def test_env_storage_flow_drops_legacy_setup_profile_on_write(tmp_path: Path) -> None:
-    """Modular flows should not persist LIGHTRAG_SETUP_PROFILE into regenerated .env files."""
+    """Modular flows should not persist LIGHTRAG_SETUP_PROFILE into regenerated ..env files."""
 
     write_text_lines(
-        tmp_path / ".env",
+        tmp_path / "..env",
         [
             "LIGHTRAG_SETUP_PROFILE=production",
             "LIGHTRAG_KV_STORAGE=JsonKVStorage",
@@ -3544,8 +3544,8 @@ def test_env_storage_flow_drops_legacy_setup_profile_on_write(tmp_path: Path) ->
         ],
     )
     write_text_lines(
-        tmp_path / "env.example",
-        (REPO_ROOT / "env.example").read_text(encoding="utf-8").splitlines(),
+        tmp_path / ".env.example",
+        (REPO_ROOT / ".env.example").read_text(encoding="utf-8").splitlines(),
     )
 
     run_bash(
@@ -3570,7 +3570,7 @@ env_storage_flow
 """
     )
 
-    generated_env = (tmp_path / ".env").read_text(encoding="utf-8")
+    generated_env = (tmp_path / "..env").read_text(encoding="utf-8")
     assert "LIGHTRAG_RUNTIME_TARGET=host" in generated_env
     assert "LIGHTRAG_SETUP_PROFILE=" not in generated_env
 
@@ -3578,7 +3578,7 @@ env_storage_flow
 def test_env_base_flow_registers_vllm_rerank_service_for_docker_deployment(
     tmp_path: Path,
 ) -> None:
-    """Choosing docker rerank in env-base should add vllm-rerank to DOCKER_SERVICE_SET."""
+    """Choosing docker rerank in .env-base should add vllm-rerank to DOCKER_SERVICE_SET."""
 
     output = run_bash(
         f"""
@@ -3619,10 +3619,10 @@ env_base_flow
 def test_env_base_flow_preserves_existing_vllm_rerank_settings_on_rerun(
     tmp_path: Path,
 ) -> None:
-    """Rerunning env-base should keep saved local vLLM rerank model and port."""
+    """Rerunning .env-base should keep saved local vLLM rerank model and port."""
 
     write_text_lines(
-        tmp_path / ".env",
+        tmp_path / "..env",
         [
             "LLM_BINDING=openai",
             "LLM_MODEL=gpt-4o-mini",
@@ -3683,7 +3683,7 @@ def test_env_base_flow_does_not_repeat_rerank_docker_prompt_when_declined(
     """Declining rerank Docker at the outer prompt should switch to endpoint-based config."""
 
     write_text_lines(
-        tmp_path / ".env",
+        tmp_path / "..env",
         [
             "LLM_BINDING=openai",
             "LLM_MODEL=gpt-4o-mini",
@@ -3790,11 +3790,11 @@ def test_env_base_flow_comments_rerank_setup_marker_when_switching_off_docker(
     """Switching rerank from Docker to a non-Docker provider should drop the setup marker."""
 
     write_text_lines(
-        tmp_path / "env.example",
-        (REPO_ROOT / "env.example").read_text(encoding="utf-8").splitlines(),
+        tmp_path / ".env.example",
+        (REPO_ROOT / ".env.example").read_text(encoding="utf-8").splitlines(),
     )
     write_text_lines(
-        tmp_path / ".env",
+        tmp_path / "..env",
         [
             "LLM_BINDING=openai",
             "LLM_MODEL=gpt-4o-mini",
@@ -3852,7 +3852,7 @@ env_base_flow
 """
     )
 
-    generated_env = (tmp_path / ".env").read_text(encoding="utf-8")
+    generated_env = (tmp_path / "..env").read_text(encoding="utf-8")
     active_marker_lines = [
         line
         for line in generated_env.splitlines()
@@ -3869,7 +3869,7 @@ def test_env_base_flow_resets_remote_rerank_host_when_switching_to_vllm(
     """Switching a remote reranker to local vLLM should restore localhost."""
 
     write_text_lines(
-        tmp_path / ".env",
+        tmp_path / "..env",
         [
             "LLM_BINDING=openai",
             "LLM_MODEL=gpt-4o-mini",
@@ -3929,7 +3929,7 @@ def test_env_base_flow_preserves_existing_vllm_rerank_device_on_gpu_host(
     """Saved vLLM rerank CPU/GPU mode should win over auto-detected GPU defaults."""
 
     write_text_lines(
-        tmp_path / ".env",
+        tmp_path / "..env",
         [
             "LLM_BINDING=openai",
             "LLM_MODEL=gpt-4o-mini",
@@ -3986,10 +3986,10 @@ env_base_flow
 def test_env_base_flow_preserves_existing_vllm_rerank_cuda_device_on_rerun(
     tmp_path: Path,
 ) -> None:
-    """Saved vLLM rerank CUDA mode should survive env-base reruns."""
+    """Saved vLLM rerank CUDA mode should survive .env-base reruns."""
 
     write_text_lines(
-        tmp_path / ".env",
+        tmp_path / "..env",
         [
             "LLM_BINDING=openai",
             "LLM_MODEL=gpt-4o-mini",
@@ -4046,10 +4046,10 @@ env_base_flow
 def test_env_storage_flow_applies_selected_storage_backends(
     tmp_path: Path,
 ) -> None:
-    """env-storage should honor the selected backends without auto-applying a preset."""
+    """.env-storage should honor the selected backends without auto-applying a preset."""
 
     write_text_lines(
-        tmp_path / ".env",
+        tmp_path / "..env",
         [
             "LIGHTRAG_KV_STORAGE=JsonKVStorage",
             "LIGHTRAG_VECTOR_STORAGE=NanoVectorDBStorage",
@@ -4096,7 +4096,7 @@ env_storage_flow
     assert values["LIGHTRAG_VECTOR_STORAGE"] == "MilvusVectorDBStorage"
     assert values["LIGHTRAG_GRAPH_STORAGE"] == "Neo4JStorage"
     assert values["LIGHTRAG_DOC_STATUS_STORAGE"] == "RedisDocStatusStorage"
-    # LLM and embedding settings from existing .env are preserved
+    # LLM and embedding settings from existing ..env are preserved
     assert values["LLM_BINDING"] == "ollama"
     assert values["EMBEDDING_BINDING"] == "ollama"
 
@@ -4107,7 +4107,7 @@ def test_env_storage_flow_reuses_saved_storage_docker_default(
     """Saved storage deployment metadata should drive the next Docker prompt default."""
 
     write_text_lines(
-        tmp_path / ".env",
+        tmp_path / "..env",
         [
             "LIGHTRAG_SETUP_POSTGRES_DEPLOYMENT=docker",
             "LIGHTRAG_KV_STORAGE=PGKVStorage",
@@ -4145,18 +4145,18 @@ env_storage_flow
 def test_env_storage_flow_writes_storage_docker_marker_for_selected_service(
     tmp_path: Path,
 ) -> None:
-    """Choosing a bundled storage service should persist its deployment marker in `.env`."""
+    """Choosing a bundled storage service should persist its deployment marker in `..env`."""
 
     write_text_lines(
-        tmp_path / ".env",
+        tmp_path / "..env",
         [
             "LLM_BINDING=ollama",
             "EMBEDDING_BINDING=ollama",
         ],
     )
     write_text_lines(
-        tmp_path / "env.example",
-        (REPO_ROOT / "env.example").read_text(encoding="utf-8").splitlines(),
+        tmp_path / ".env.example",
+        (REPO_ROOT / ".env.example").read_text(encoding="utf-8").splitlines(),
     )
     (tmp_path / "docker-compose.yml").write_text(
         (REPO_ROOT / "docker-compose.yml").read_text(encoding="utf-8"),
@@ -4200,7 +4200,7 @@ env_storage_flow
 """
     )
 
-    generated_env = (tmp_path / ".env").read_text(encoding="utf-8")
+    generated_env = (tmp_path / "..env").read_text(encoding="utf-8")
     assert any(
         line == "LIGHTRAG_SETUP_POSTGRES_DEPLOYMENT=docker"
         for line in generated_env.splitlines()
@@ -4211,18 +4211,18 @@ env_storage_flow
 def test_env_storage_flow_writes_opensearch_docker_marker_for_selected_service(
     tmp_path: Path,
 ) -> None:
-    """Choosing bundled OpenSearch should persist its deployment marker in `.env`."""
+    """Choosing bundled OpenSearch should persist its deployment marker in `..env`."""
 
     write_text_lines(
-        tmp_path / ".env",
+        tmp_path / "..env",
         [
             "LLM_BINDING=ollama",
             "EMBEDDING_BINDING=ollama",
         ],
     )
     write_text_lines(
-        tmp_path / "env.example",
-        (REPO_ROOT / "env.example").read_text(encoding="utf-8").splitlines(),
+        tmp_path / ".env.example",
+        (REPO_ROOT / ".env.example").read_text(encoding="utf-8").splitlines(),
     )
     (tmp_path / "docker-compose.yml").write_text(
         (REPO_ROOT / "docker-compose.yml").read_text(encoding="utf-8"),
@@ -4266,7 +4266,7 @@ env_storage_flow
 """
     )
 
-    generated_env = (tmp_path / ".env").read_text(encoding="utf-8")
+    generated_env = (tmp_path / "..env").read_text(encoding="utf-8")
     assert any(
         line == "LIGHTRAG_SETUP_OPENSEARCH_DEPLOYMENT=docker"
         for line in generated_env.splitlines()
@@ -4280,7 +4280,7 @@ def test_env_storage_flow_removes_storage_docker_marker_when_switching_to_host(
     """Choosing a host-managed storage backend should clear a previously saved Docker marker."""
 
     write_text_lines(
-        tmp_path / ".env",
+        tmp_path / "..env",
         [
             "LIGHTRAG_SETUP_POSTGRES_DEPLOYMENT=docker",
             "LIGHTRAG_KV_STORAGE=PGKVStorage",
@@ -4290,8 +4290,8 @@ def test_env_storage_flow_removes_storage_docker_marker_when_switching_to_host(
         ],
     )
     write_text_lines(
-        tmp_path / "env.example",
-        (REPO_ROOT / "env.example").read_text(encoding="utf-8").splitlines(),
+        tmp_path / ".env.example",
+        (REPO_ROOT / ".env.example").read_text(encoding="utf-8").splitlines(),
     )
 
     run_bash(
@@ -4330,7 +4330,7 @@ env_storage_flow
 """
     )
 
-    generated_env = (tmp_path / ".env").read_text(encoding="utf-8")
+    generated_env = (tmp_path / "..env").read_text(encoding="utf-8")
     assert not any(
         line.startswith("LIGHTRAG_SETUP_POSTGRES_DEPLOYMENT=")
         for line in generated_env.splitlines()
@@ -4344,7 +4344,7 @@ def test_env_storage_flow_clears_unused_storage_docker_markers(
     """Markers for databases no longer required by the selected backends should be removed."""
 
     write_text_lines(
-        tmp_path / ".env",
+        tmp_path / "..env",
         [
             "LIGHTRAG_SETUP_POSTGRES_DEPLOYMENT=docker",
             "LIGHTRAG_KV_STORAGE=PGKVStorage",
@@ -4354,8 +4354,8 @@ def test_env_storage_flow_clears_unused_storage_docker_markers(
         ],
     )
     write_text_lines(
-        tmp_path / "env.example",
-        (REPO_ROOT / "env.example").read_text(encoding="utf-8").splitlines(),
+        tmp_path / ".env.example",
+        (REPO_ROOT / ".env.example").read_text(encoding="utf-8").splitlines(),
     )
 
     run_bash(
@@ -4387,7 +4387,7 @@ env_storage_flow
 """
     )
 
-    generated_env = (tmp_path / ".env").read_text(encoding="utf-8")
+    generated_env = (tmp_path / "..env").read_text(encoding="utf-8")
     assert not any(
         line.startswith("LIGHTRAG_SETUP_POSTGRES_DEPLOYMENT=")
         for line in generated_env.splitlines()
@@ -4396,9 +4396,9 @@ env_storage_flow
 
 
 def test_env_storage_flow_generates_env_and_compose_files(tmp_path: Path) -> None:
-    """env-storage should write updated .env and a docker-compose.final.yml."""
+    """.env-storage should write updated ..env and a docker-compose.final.yml."""
 
-    env_file = tmp_path / ".env"
+    env_file = tmp_path / "..env"
     env_file.write_text(
         "\n".join(
             [
@@ -4412,8 +4412,8 @@ def test_env_storage_flow_generates_env_and_compose_files(tmp_path: Path) -> Non
         + "\n",
         encoding="utf-8",
     )
-    (tmp_path / "env.example").write_text(
-        (REPO_ROOT / "env.example").read_text(encoding="utf-8"),
+    (tmp_path / ".env.example").write_text(
+        (REPO_ROOT / ".env.example").read_text(encoding="utf-8"),
         encoding="utf-8",
     )
     (tmp_path / "docker-compose.yml").write_text(
@@ -4452,7 +4452,7 @@ env_storage_flow
 """
     )
 
-    generated_env = (tmp_path / ".env").read_text(encoding="utf-8")
+    generated_env = (tmp_path / "..env").read_text(encoding="utf-8")
     generated_compose = (tmp_path / "docker-compose.final.yml").read_text(
         encoding="utf-8"
     )
@@ -4468,9 +4468,9 @@ env_storage_flow
 def test_env_storage_flow_uses_rag_defaults_for_empty_postgres_docker_credentials(
     tmp_path: Path,
 ) -> None:
-    """env-storage should write bundled postgres credentials when old `.env` creds are empty."""
+    """.env-storage should write bundled postgres credentials when old `..env` creds are empty."""
 
-    env_file = tmp_path / ".env"
+    env_file = tmp_path / "..env"
     env_file.write_text(
         "\n".join(
             [
@@ -4487,8 +4487,8 @@ def test_env_storage_flow_uses_rag_defaults_for_empty_postgres_docker_credential
         + "\n",
         encoding="utf-8",
     )
-    (tmp_path / "env.example").write_text(
-        (REPO_ROOT / "env.example").read_text(encoding="utf-8"),
+    (tmp_path / ".env.example").write_text(
+        (REPO_ROOT / ".env.example").read_text(encoding="utf-8"),
         encoding="utf-8",
     )
     (tmp_path / "docker-compose.yml").write_text(
@@ -4539,7 +4539,7 @@ printf 'PROMPT_LOG=%s\\n' "$(paste -sd '|' "$PROMPT_LOG_FILE")"
         cwd=tmp_path,
     )
 
-    generated_env = (tmp_path / ".env").read_text(encoding="utf-8")
+    generated_env = (tmp_path / "..env").read_text(encoding="utf-8")
     generated_compose = (tmp_path / "docker-compose.final.yml").read_text(
         encoding="utf-8"
     )
@@ -4656,7 +4656,7 @@ fi
 def test_env_storage_flow_backs_up_existing_compose_before_rewrite(
     tmp_path: Path,
 ) -> None:
-    """env-storage should back up the current compose file before rewriting it."""
+    """.env-storage should back up the current compose file before rewriting it."""
 
     existing_compose = (
         "\n".join(
@@ -4674,15 +4674,15 @@ def test_env_storage_flow_backs_up_existing_compose_before_rewrite(
     )
 
     write_text_lines(
-        tmp_path / ".env",
+        tmp_path / "..env",
         [
             "LLM_BINDING=openai",
             "EMBEDDING_BINDING=openai",
         ],
     )
     write_text_lines(
-        tmp_path / "env.example",
-        (REPO_ROOT / "env.example").read_text(encoding="utf-8").splitlines(),
+        tmp_path / ".env.example",
+        (REPO_ROOT / ".env.example").read_text(encoding="utf-8").splitlines(),
     )
     (tmp_path / "docker-compose.final.yml").write_text(
         existing_compose,
@@ -4725,7 +4725,7 @@ env_storage_flow
 def test_env_storage_flow_keeps_compose_mode_for_user_sidecars(
     tmp_path: Path,
 ) -> None:
-    """env-storage should keep LightRAG in Docker when user sidecars are present."""
+    """.env-storage should keep LightRAG in Docker when user sidecars are present."""
 
     existing_compose = (
         "\n".join(
@@ -4743,15 +4743,15 @@ def test_env_storage_flow_keeps_compose_mode_for_user_sidecars(
     )
 
     write_text_lines(
-        tmp_path / ".env",
+        tmp_path / "..env",
         [
             "LLM_BINDING=openai",
             "EMBEDDING_BINDING=openai",
         ],
     )
     write_text_lines(
-        tmp_path / "env.example",
-        (REPO_ROOT / "env.example").read_text(encoding="utf-8").splitlines(),
+        tmp_path / ".env.example",
+        (REPO_ROOT / ".env.example").read_text(encoding="utf-8").splitlines(),
     )
     (tmp_path / "docker-compose.final.yml").write_text(
         existing_compose,
@@ -4783,7 +4783,7 @@ env_storage_flow
     )
 
     result = (tmp_path / "docker-compose.final.yml").read_text(encoding="utf-8")
-    generated_env = (tmp_path / ".env").read_text(encoding="utf-8")
+    generated_env = (tmp_path / "..env").read_text(encoding="utf-8")
 
     assert_single_compose_backup(tmp_path, existing_compose)
     assert "  lightrag:" in result
@@ -4797,7 +4797,7 @@ def test_env_storage_flow_clears_mongodb_docker_marker_for_atlas_vector_storage(
     """MongoDB Atlas-only vector storage should not preserve a local Docker deployment marker."""
 
     write_text_lines(
-        tmp_path / ".env",
+        tmp_path / "..env",
         [
             "LIGHTRAG_SETUP_MONGODB_DEPLOYMENT=docker",
             "LIGHTRAG_KV_STORAGE=MongoKVStorage",
@@ -4807,8 +4807,8 @@ def test_env_storage_flow_clears_mongodb_docker_marker_for_atlas_vector_storage(
         ],
     )
     write_text_lines(
-        tmp_path / "env.example",
-        (REPO_ROOT / "env.example").read_text(encoding="utf-8").splitlines(),
+        tmp_path / ".env.example",
+        (REPO_ROOT / ".env.example").read_text(encoding="utf-8").splitlines(),
     )
 
     run_bash(
@@ -4837,7 +4837,7 @@ env_storage_flow
 """
     )
 
-    generated_env = (tmp_path / ".env").read_text(encoding="utf-8")
+    generated_env = (tmp_path / "..env").read_text(encoding="utf-8")
     assert not any(
         line.startswith("LIGHTRAG_SETUP_MONGODB_DEPLOYMENT=")
         for line in generated_env.splitlines()
@@ -4848,10 +4848,10 @@ env_storage_flow
 def test_env_storage_flow_preserves_existing_compose_ssl_when_env_paths_are_stale(
     tmp_path: Path,
 ) -> None:
-    """env-storage should keep compose SSL wiring when inherited source paths no longer exist."""
+    """.env-storage should keep compose SSL wiring when inherited source paths no longer exist."""
 
     write_text_lines(
-        tmp_path / ".env",
+        tmp_path / "..env",
         [
             "SSL=true",
             "SSL_CERTFILE=/missing/cert.pem",
@@ -4865,8 +4865,8 @@ def test_env_storage_flow_preserves_existing_compose_ssl_when_env_paths_are_stal
         ],
     )
     write_text_lines(
-        tmp_path / "env.example",
-        (REPO_ROOT / "env.example").read_text(encoding="utf-8").splitlines(),
+        tmp_path / ".env.example",
+        (REPO_ROOT / ".env.example").read_text(encoding="utf-8").splitlines(),
     )
     write_text_lines(
         tmp_path / "docker-compose.final.yml",
@@ -4923,10 +4923,10 @@ env_storage_flow
 def test_env_server_flow_preserves_existing_compose_ssl_when_env_paths_are_stale(
     tmp_path: Path,
 ) -> None:
-    """env-server should keep compose SSL wiring and variable-based port publishing."""
+    """.env-server should keep compose SSL wiring and variable-based port publishing."""
 
     write_text_lines(
-        tmp_path / ".env",
+        tmp_path / "..env",
         [
             "SSL=true",
             "SSL_CERTFILE=/missing/cert.pem",
@@ -4936,8 +4936,8 @@ def test_env_server_flow_preserves_existing_compose_ssl_when_env_paths_are_stale
         ],
     )
     write_text_lines(
-        tmp_path / "env.example",
-        (REPO_ROOT / "env.example").read_text(encoding="utf-8").splitlines(),
+        tmp_path / ".env.example",
+        (REPO_ROOT / ".env.example").read_text(encoding="utf-8").splitlines(),
     )
     write_text_lines(
         tmp_path / "docker-compose.final.yml",
@@ -4993,7 +4993,7 @@ env_server_flow
 def test_env_server_flow_backs_up_existing_compose_before_rewrite(
     tmp_path: Path,
 ) -> None:
-    """env-server should back up the current compose file before rewriting it."""
+    """.env-server should back up the current compose file before rewriting it."""
 
     existing_compose = (
         "\n".join(
@@ -5009,15 +5009,15 @@ def test_env_server_flow_backs_up_existing_compose_before_rewrite(
     )
 
     write_text_lines(
-        tmp_path / ".env",
+        tmp_path / "..env",
         [
             "HOST=0.0.0.0",
             "PORT=9621",
         ],
     )
     write_text_lines(
-        tmp_path / "env.example",
-        (REPO_ROOT / "env.example").read_text(encoding="utf-8").splitlines(),
+        tmp_path / ".env.example",
+        (REPO_ROOT / ".env.example").read_text(encoding="utf-8").splitlines(),
     )
     (tmp_path / "docker-compose.final.yml").write_text(
         existing_compose,
@@ -5059,7 +5059,7 @@ env_server_flow
 def test_switching_to_non_docker_storage_removes_stale_services_from_compose(
     tmp_path: Path,
 ) -> None:
-    """env-storage must strip managed storage services while preserving user sidecars."""
+    """.env-storage must strip managed storage services while preserving user sidecars."""
 
     # Existing compose with postgres and neo4j Docker services.
     compose_file = tmp_path / "docker-compose.final.yml"
@@ -5087,10 +5087,10 @@ def test_switching_to_non_docker_storage_removes_stale_services_from_compose(
         + "\n",
         encoding="utf-8",
     )
-    env_file = tmp_path / ".env"
+    env_file = tmp_path / "..env"
     env_file.write_text("LLM_BINDING=openai\n", encoding="utf-8")
-    (tmp_path / "env.example").write_text(
-        (REPO_ROOT / "env.example").read_text(encoding="utf-8"),
+    (tmp_path / ".env.example").write_text(
+        (REPO_ROOT / ".env.example").read_text(encoding="utf-8"),
         encoding="utf-8",
     )
     (tmp_path / "docker-compose.yml").write_text(
@@ -5138,10 +5138,10 @@ env_storage_flow
 def test_env_storage_flow_drops_stale_vllm_services_missing_from_env_markers(
     tmp_path: Path,
 ) -> None:
-    """env-storage should remove stale vLLM services unless `.env` still marks them as Docker-managed."""
+    """.env-storage should remove stale vLLM services unless `..env` still marks them as Docker-managed."""
 
     write_text_lines(
-        tmp_path / ".env",
+        tmp_path / "..env",
         [
             "LIGHTRAG_RUNTIME_TARGET=compose",
             "LLM_BINDING=openai",
@@ -5151,8 +5151,8 @@ def test_env_storage_flow_drops_stale_vllm_services_missing_from_env_markers(
         ],
     )
     write_text_lines(
-        tmp_path / "env.example",
-        (REPO_ROOT / "env.example").read_text(encoding="utf-8").splitlines(),
+        tmp_path / ".env.example",
+        (REPO_ROOT / ".env.example").read_text(encoding="utf-8").splitlines(),
     )
     (tmp_path / "docker-compose.final.yml").write_text(
         "\n".join(
@@ -5198,7 +5198,7 @@ env_storage_flow
     )
 
     result = (tmp_path / "docker-compose.final.yml").read_text(encoding="utf-8")
-    generated_env = (tmp_path / ".env").read_text(encoding="utf-8")
+    generated_env = (tmp_path / "..env").read_text(encoding="utf-8")
 
     assert "  vllm-embed:" not in result
     assert "  vllm-rerank:" not in result
@@ -5210,10 +5210,10 @@ env_storage_flow
 def test_env_storage_flow_preserves_vllm_services_marked_in_env(
     tmp_path: Path,
 ) -> None:
-    """env-storage should restore vLLM services from `.env` markers even without old compose entries."""
+    """.env-storage should restore vLLM services from `..env` markers even without old compose entries."""
 
     write_text_lines(
-        tmp_path / ".env",
+        tmp_path / "..env",
         [
             "LIGHTRAG_RUNTIME_TARGET=compose",
             "LLM_BINDING=openai",
@@ -5226,8 +5226,8 @@ def test_env_storage_flow_preserves_vllm_services_marked_in_env(
         ],
     )
     write_text_lines(
-        tmp_path / "env.example",
-        (REPO_ROOT / "env.example").read_text(encoding="utf-8").splitlines(),
+        tmp_path / ".env.example",
+        (REPO_ROOT / ".env.example").read_text(encoding="utf-8").splitlines(),
     )
     write_text_lines(
         tmp_path / "docker-compose.final.yml",
@@ -5263,7 +5263,7 @@ env_storage_flow
     )
 
     result = (tmp_path / "docker-compose.final.yml").read_text(encoding="utf-8")
-    generated_env = (tmp_path / ".env").read_text(encoding="utf-8")
+    generated_env = (tmp_path / "..env").read_text(encoding="utf-8")
 
     assert "  vllm-embed:" in result
     assert "LIGHTRAG_RUNTIME_TARGET=compose" in generated_env
@@ -5272,7 +5272,7 @@ env_storage_flow
 def test_env_storage_flow_deletes_compose_when_switching_lightrag_to_host(
     tmp_path: Path,
 ) -> None:
-    """env-storage should back up and delete compose when no Docker services remain."""
+    """.env-storage should back up and delete compose when no Docker services remain."""
 
     existing_compose = (
         "\n".join(
@@ -5288,7 +5288,7 @@ def test_env_storage_flow_deletes_compose_when_switching_lightrag_to_host(
     )
 
     write_text_lines(
-        tmp_path / ".env",
+        tmp_path / "..env",
         [
             "LIGHTRAG_RUNTIME_TARGET=compose",
             "LLM_BINDING=openai",
@@ -5296,8 +5296,8 @@ def test_env_storage_flow_deletes_compose_when_switching_lightrag_to_host(
         ],
     )
     write_text_lines(
-        tmp_path / "env.example",
-        (REPO_ROOT / "env.example").read_text(encoding="utf-8").splitlines(),
+        tmp_path / ".env.example",
+        (REPO_ROOT / ".env.example").read_text(encoding="utf-8").splitlines(),
     )
     (tmp_path / "docker-compose.final.yml").write_text(
         existing_compose,
@@ -5335,7 +5335,7 @@ env_storage_flow
 
     assert_single_compose_backup(tmp_path, existing_compose)
     assert not (tmp_path / "docker-compose.final.yml").exists()
-    generated_env = (tmp_path / ".env").read_text(encoding="utf-8")
+    generated_env = (tmp_path / "..env").read_text(encoding="utf-8")
     assert "LIGHTRAG_RUNTIME_TARGET=host" in generated_env
 
 
@@ -5345,15 +5345,15 @@ def test_generate_docker_compose_uses_template_images_even_with_old_env_override
     """Managed services should be regenerated from templates instead of legacy image overrides."""
 
     write_text_lines(
-        tmp_path / ".env",
+        tmp_path / "..env",
         [
             "POSTGRES_IMAGE=registry.example.com/postgres-for-rag:patched",
             "VLLM_EMBED_IMAGE_TAG=patched",
         ],
     )
     write_text_lines(
-        tmp_path / "env.example",
-        (REPO_ROOT / "env.example").read_text(encoding="utf-8").splitlines(),
+        tmp_path / ".env.example",
+        (REPO_ROOT / ".env.example").read_text(encoding="utf-8").splitlines(),
     )
 
     run_bash(
@@ -5383,11 +5383,11 @@ def test_generate_docker_compose_preserves_long_form_named_sidecar_volumes(
     """Managed-service regeneration must not misparse preserved long-form named volumes."""
 
     write_text_lines(
-        tmp_path / "env.example",
-        (REPO_ROOT / "env.example").read_text(encoding="utf-8").splitlines(),
+        tmp_path / ".env.example",
+        (REPO_ROOT / ".env.example").read_text(encoding="utf-8").splitlines(),
     )
     write_text_lines(
-        tmp_path / ".env",
+        tmp_path / "..env",
         [
             "LLM_BINDING=openai",
             "EMBEDDING_BINDING=openai",
@@ -5460,9 +5460,9 @@ def test_collect_milvus_config_initializes_minio_credentials_for_local_docker(
 ) -> None:
     """Local Docker Milvus should write default MinIO credentials when none exist yet."""
 
-    env_file = tmp_path / ".env"
-    env_example = tmp_path / "env.example"
-    env_example.write_text((REPO_ROOT / "env.example").read_text(encoding="utf-8"))
+    env_file = tmp_path / "..env"
+    env_example = tmp_path / ".env.example"
+    env_example.write_text((REPO_ROOT / ".env.example").read_text(encoding="utf-8"))
 
     run_bash(
         f"""
@@ -5481,7 +5481,7 @@ prompt_until_valid() {{
 }}
 
 collect_milvus_config yes
-generate_env_file "$REPO_ROOT/env.example" "$REPO_ROOT/.env"
+generate_env_file "$REPO_ROOT/.env.example" "$REPO_ROOT/..env"
 """,
         cwd=tmp_path,
     )
@@ -5613,7 +5613,7 @@ printf '{env_key}=%s\\n' "${{COMPOSE_ENV_OVERRIDES[{env_key}]}}"
 def test_collect_mongodb_config_local_service_strips_stale_credentials_on_rerun() -> (
     None
 ):
-    """Bundled MongoDB should keep host `.env` aligned with the unauthenticated template."""
+    """Bundled MongoDB should keep host `..env` aligned with the unauthenticated template."""
 
     values = run_bash_lines(
         f"""
@@ -5647,7 +5647,7 @@ printf 'DOCKER_SERVICE=%s\\n' "${{DOCKER_SERVICES[0]}}"
 
 
 def test_collect_redis_config_local_service_normalizes_custom_host_port() -> None:
-    """Bundled Redis should keep host `.env` aligned with the published local port."""
+    """Bundled Redis should keep host `..env` aligned with the published local port."""
 
     values = run_bash_lines(
         f"""
@@ -5721,7 +5721,7 @@ def test_generate_docker_compose_injects_server_host_and_port_overrides(
                 "  lightrag:",
                 "    image: example/lightrag:test",
                 "    env_file:",
-                "      - .env",
+                "      - ..env",
                 "    ports:",
                 '      - "${PORT:-9621}:9621"',
             ]
@@ -5776,7 +5776,7 @@ def test_generate_docker_compose_injects_env_overrides_into_lightrag_not_after_m
                 "    environment:",
                 "      EXISTING_KEY: existing_value",
                 "    volumes:",
-                "      - ./.env:/app/.env",
+                "      - ./..env:/app/..env",
                 "volumes:",
                 "  some_volume:",
             ]
@@ -5839,12 +5839,12 @@ def test_finalize_server_setup_skips_embedded_milvus_sub_services(
         + "\n",
         encoding="utf-8",
     )
-    (tmp_path / "env.example").write_text(
-        (REPO_ROOT / "env.example").read_text(encoding="utf-8"),
+    (tmp_path / ".env.example").write_text(
+        (REPO_ROOT / ".env.example").read_text(encoding="utf-8"),
         encoding="utf-8",
     )
     write_text_lines(
-        tmp_path / ".env",
+        tmp_path / "..env",
         [
             "LIGHTRAG_SETUP_MILVUS_DEPLOYMENT=docker",
         ],
@@ -5883,15 +5883,15 @@ def test_finalize_server_setup_uses_compose_native_neo4j_endpoint_on_rerun(
     """Preserved managed services should inject compose-native endpoints on server reruns."""
 
     write_text_lines(
-        tmp_path / ".env",
+        tmp_path / "..env",
         [
             "LIGHTRAG_SETUP_NEO4J_DEPLOYMENT=docker",
             "NEO4J_URI=neo4j://localhost:7687",
         ],
     )
     write_text_lines(
-        tmp_path / "env.example",
-        (REPO_ROOT / "env.example").read_text(encoding="utf-8").splitlines(),
+        tmp_path / ".env.example",
+        (REPO_ROOT / ".env.example").read_text(encoding="utf-8").splitlines(),
     )
     write_text_lines(
         tmp_path / "docker-compose.final.yml",
@@ -5928,18 +5928,18 @@ finalize_server_setup
 def test_finalize_server_setup_drops_stale_managed_services_missing_from_env_markers(
     tmp_path: Path,
 ) -> None:
-    """env-server should remove stale wizard-managed services not marked in `.env`."""
+    """.env-server should remove stale wizard-managed services not marked in `..env`."""
 
     write_text_lines(
-        tmp_path / ".env",
+        tmp_path / "..env",
         [
             "HOST=0.0.0.0",
             "PORT=9621",
         ],
     )
     write_text_lines(
-        tmp_path / "env.example",
-        (REPO_ROOT / "env.example").read_text(encoding="utf-8").splitlines(),
+        tmp_path / ".env.example",
+        (REPO_ROOT / ".env.example").read_text(encoding="utf-8").splitlines(),
     )
     write_text_lines(
         tmp_path / "docker-compose.final.yml",
@@ -5982,7 +5982,7 @@ finalize_server_setup
     )
 
     result = (tmp_path / "docker-compose.final.yml").read_text(encoding="utf-8")
-    generated_env = (tmp_path / ".env").read_text(encoding="utf-8")
+    generated_env = (tmp_path / "..env").read_text(encoding="utf-8")
 
     assert "  redis:" not in result
     assert "  vllm-embed:" not in result
@@ -5995,7 +5995,7 @@ finalize_server_setup
 def test_env_server_flow_deletes_compose_when_switching_lightrag_to_host(
     tmp_path: Path,
 ) -> None:
-    """env-server should back up and delete compose when no managed or sidecar services remain."""
+    """.env-server should back up and delete compose when no managed or sidecar services remain."""
 
     existing_compose = (
         "\n".join(
@@ -6011,7 +6011,7 @@ def test_env_server_flow_deletes_compose_when_switching_lightrag_to_host(
     )
 
     write_text_lines(
-        tmp_path / ".env",
+        tmp_path / "..env",
         [
             "LIGHTRAG_RUNTIME_TARGET=compose",
             "HOST=0.0.0.0",
@@ -6019,8 +6019,8 @@ def test_env_server_flow_deletes_compose_when_switching_lightrag_to_host(
         ],
     )
     write_text_lines(
-        tmp_path / "env.example",
-        (REPO_ROOT / "env.example").read_text(encoding="utf-8").splitlines(),
+        tmp_path / ".env.example",
+        (REPO_ROOT / ".env.example").read_text(encoding="utf-8").splitlines(),
     )
     (tmp_path / "docker-compose.final.yml").write_text(
         existing_compose,
@@ -6056,14 +6056,14 @@ env_server_flow
 
     assert_single_compose_backup(tmp_path, existing_compose)
     assert not (tmp_path / "docker-compose.final.yml").exists()
-    generated_env = (tmp_path / ".env").read_text(encoding="utf-8")
+    generated_env = (tmp_path / "..env").read_text(encoding="utf-8")
     assert "LIGHTRAG_RUNTIME_TARGET=host" in generated_env
 
 
 def test_env_server_flow_keeps_compose_mode_for_user_sidecars(
     tmp_path: Path,
 ) -> None:
-    """env-server should keep LightRAG in Docker when compose still carries user sidecars."""
+    """.env-server should keep LightRAG in Docker when compose still carries user sidecars."""
 
     existing_compose = (
         "\n".join(
@@ -6079,7 +6079,7 @@ def test_env_server_flow_keeps_compose_mode_for_user_sidecars(
     )
 
     write_text_lines(
-        tmp_path / ".env",
+        tmp_path / "..env",
         [
             "LIGHTRAG_RUNTIME_TARGET=compose",
             "HOST=0.0.0.0",
@@ -6087,8 +6087,8 @@ def test_env_server_flow_keeps_compose_mode_for_user_sidecars(
         ],
     )
     write_text_lines(
-        tmp_path / "env.example",
-        (REPO_ROOT / "env.example").read_text(encoding="utf-8").splitlines(),
+        tmp_path / ".env.example",
+        (REPO_ROOT / ".env.example").read_text(encoding="utf-8").splitlines(),
     )
     (tmp_path / "docker-compose.final.yml").write_text(
         existing_compose,
@@ -6117,7 +6117,7 @@ env_server_flow
     )
 
     result = (tmp_path / "docker-compose.final.yml").read_text(encoding="utf-8")
-    generated_env = (tmp_path / ".env").read_text(encoding="utf-8")
+    generated_env = (tmp_path / "..env").read_text(encoding="utf-8")
 
     assert "  sidecar:" in result
     assert "  lightrag:" in result
@@ -6143,7 +6143,7 @@ def test_env_server_flow_rejects_invalid_ssl_cert_when_switching_to_host(
     )
 
     write_text_lines(
-        tmp_path / ".env",
+        tmp_path / "..env",
         [
             "LIGHTRAG_RUNTIME_TARGET=compose",
             "HOST=0.0.0.0",
@@ -6154,8 +6154,8 @@ def test_env_server_flow_rejects_invalid_ssl_cert_when_switching_to_host(
         ],
     )
     write_text_lines(
-        tmp_path / "env.example",
-        (REPO_ROOT / "env.example").read_text(encoding="utf-8").splitlines(),
+        tmp_path / ".env.example",
+        (REPO_ROOT / ".env.example").read_text(encoding="utf-8").splitlines(),
     )
     (tmp_path / "docker-compose.final.yml").write_text(
         existing_compose,
@@ -6195,9 +6195,9 @@ env_server_flow
         "Invalid SSL_CERTFILE" in result.stderr
         or "Invalid SSL_CERTFILE" in result.stdout
     )
-    # compose and .env must not have been modified
+    # compose and ..env must not have been modified
     assert (tmp_path / "docker-compose.final.yml").exists()
-    assert "LIGHTRAG_RUNTIME_TARGET=compose" in (tmp_path / ".env").read_text(
+    assert "LIGHTRAG_RUNTIME_TARGET=compose" in (tmp_path / "..env").read_text(
         encoding="utf-8"
     )
 
@@ -6238,10 +6238,10 @@ detect_managed_root_services "{tmp_path}/docker-compose.final.yml"
 def test_finalize_server_setup_allows_risky_security_config_and_security_check_reports_it(
     tmp_path: Path,
 ) -> None:
-    """Wizard writes `.env` without blocking, while security-check reports risky settings."""
+    """Wizard writes `..env` without blocking, while security-check reports risky settings."""
 
     write_text_lines(
-        tmp_path / ".env",
+        tmp_path / "..env",
         [
             "AUTH_ACCOUNTS=admin:secret",
             "TOKEN_SECRET=jwt-secret",
@@ -6249,8 +6249,8 @@ def test_finalize_server_setup_allows_risky_security_config_and_security_check_r
         ],
     )
     write_text_lines(
-        tmp_path / "env.example",
-        (REPO_ROOT / "env.example").read_text(encoding="utf-8").splitlines(),
+        tmp_path / ".env.example",
+        (REPO_ROOT / ".env.example").read_text(encoding="utf-8").splitlines(),
     )
 
     output = run_bash(
@@ -6304,7 +6304,7 @@ def test_finalize_server_setup_allows_predictable_auth_passwords_and_security_ch
     """Server setup should not block on weak password prefixes that belong to security audit."""
 
     write_text_lines(
-        tmp_path / ".env",
+        tmp_path / "..env",
         [
             "AUTH_ACCOUNTS=admin:Passw0rd!",
             "TOKEN_SECRET=jwt-secret",
@@ -6312,8 +6312,8 @@ def test_finalize_server_setup_allows_predictable_auth_passwords_and_security_ch
         ],
     )
     write_text_lines(
-        tmp_path / "env.example",
-        (REPO_ROOT / "env.example").read_text(encoding="utf-8").splitlines(),
+        tmp_path / ".env.example",
+        (REPO_ROOT / ".env.example").read_text(encoding="utf-8").splitlines(),
     )
 
     output = run_bash(
@@ -6364,10 +6364,10 @@ security_check_env_file
 def test_finalize_server_setup_rejects_malformed_auth_accounts(tmp_path: Path) -> None:
     """Server setup should fail fast instead of persisting invalid AUTH_ACCOUNTS syntax."""
 
-    write_text_lines(tmp_path / ".env", ["HOST=0.0.0.0"])
+    write_text_lines(tmp_path / "..env", ["HOST=0.0.0.0"])
     write_text_lines(
-        tmp_path / "env.example",
-        (REPO_ROOT / "env.example").read_text(encoding="utf-8").splitlines(),
+        tmp_path / ".env.example",
+        (REPO_ROOT / ".env.example").read_text(encoding="utf-8").splitlines(),
     )
 
     output = run_bash(
@@ -6391,7 +6391,7 @@ if finalize_server_setup; then
 else
   printf 'RESULT=failure\\n'
 fi
-printf 'ENV=%s\\n' "$(cat "$REPO_ROOT/.env")"
+printf 'ENV=%s\\n' "$(cat "$REPO_ROOT/..env")"
 """,
         cwd=tmp_path,
     )
@@ -6407,7 +6407,7 @@ def test_validate_env_file_allows_predictable_auth_passwords_and_leaves_them_to_
     """validate_env_file should allow risky-but-runnable auth settings."""
 
     write_text_lines(
-        tmp_path / ".env",
+        tmp_path / "..env",
         [
             "AUTH_ACCOUNTS=admin:Passw0rd!",
             "TOKEN_SECRET=jwt-secret",
@@ -6417,7 +6417,7 @@ def test_validate_env_file_allows_predictable_auth_passwords_and_leaves_them_to_
             "LIGHTRAG_DOC_STATUS_STORAGE=JsonDocStatusStorage",
         ],
     )
-    write_text_lines(tmp_path / "env.example", ["LLM_BINDING=openai"])
+    write_text_lines(tmp_path / ".env.example", ["LLM_BINDING=openai"])
 
     result = subprocess.run(
         [
@@ -6492,7 +6492,7 @@ def test_ssl_staging_uses_distinct_names_for_same_basename_inputs(
 ) -> None:
     """Cert/key files with the same basename should stage to distinct paths."""
 
-    env_example = tmp_path / "env.example"
+    env_example = tmp_path / ".env.example"
     env_example.write_text(
         "\n".join(
             [
@@ -6511,7 +6511,7 @@ def test_ssl_staging_uses_distinct_names_for_same_basename_inputs(
                 "  lightrag:",
                 "    image: example/lightrag:test",
                 "    env_file:",
-                "      - .env",
+                "      - ..env",
             ]
         )
         + "\n",
@@ -6641,7 +6641,7 @@ def test_finalize_flows_stage_inherited_ssl_assets_for_compose(
     cert_path.write_text("cert", encoding="utf-8")
     key_path.write_text("key", encoding="utf-8")
     write_text_lines(
-        tmp_path / ".env",
+        tmp_path / "..env",
         [
             *env_lines,
             "SSL=true",
@@ -6650,8 +6650,8 @@ def test_finalize_flows_stage_inherited_ssl_assets_for_compose(
         ],
     )
     write_text_lines(
-        tmp_path / "env.example",
-        (REPO_ROOT / "env.example").read_text(encoding="utf-8").splitlines(),
+        tmp_path / ".env.example",
+        (REPO_ROOT / ".env.example").read_text(encoding="utf-8").splitlines(),
     )
     (tmp_path / "docker-compose.yml").write_text(
         (REPO_ROOT / "docker-compose.yml").read_text(encoding="utf-8"),
@@ -6700,7 +6700,7 @@ def test_generate_docker_compose_vllm_gpu_honors_documented_gpu_selector(
 ) -> None:
     """GPU vLLM compose should honor the documented CUDA selector variables."""
 
-    env_example = tmp_path / "env.example"
+    env_example = tmp_path / ".env.example"
     env_example.write_text(
         "\n".join(
             [
@@ -6720,7 +6720,7 @@ def test_generate_docker_compose_vllm_gpu_honors_documented_gpu_selector(
                 "  lightrag:",
                 "    image: example/lightrag:test",
                 "    env_file:",
-                "      - .env",
+                "      - ..env",
             ]
         )
         + "\n",
@@ -6738,12 +6738,12 @@ ENV_VALUES[VLLM_RERANK_DEVICE]="cuda"
 ENV_VALUES[CUDA_VISIBLE_DEVICES]="0"
 add_docker_service "vllm-rerank"
 
-generate_env_file "$REPO_ROOT/env.example" "$REPO_ROOT/.env"
+generate_env_file "$REPO_ROOT/.env.example" "$REPO_ROOT/..env"
 generate_docker_compose "$REPO_ROOT/docker-compose.generated.yml"
 """
     )
 
-    generated_env = (tmp_path / ".env").read_text(encoding="utf-8")
+    generated_env = (tmp_path / "..env").read_text(encoding="utf-8")
     generated_compose = (tmp_path / "docker-compose.generated.yml").read_text(
         encoding="utf-8"
     )
@@ -6771,8 +6771,8 @@ def test_generate_docker_compose_selects_milvus_template_from_device(
     """Milvus compose generation should switch templates based on MILVUS_DEVICE."""
 
     write_text_lines(
-        tmp_path / "env.example",
-        (REPO_ROOT / "env.example").read_text(encoding="utf-8").splitlines(),
+        tmp_path / ".env.example",
+        (REPO_ROOT / ".env.example").read_text(encoding="utf-8").splitlines(),
     )
     write_text_lines(
         tmp_path / "docker-compose.yml",
@@ -6809,7 +6809,7 @@ def test_collect_security_config_can_clear_existing_values_on_rerun(
 ) -> None:
     """Rerunning security setup should be able to remove previously saved values."""
 
-    env_file = tmp_path / ".env"
+    env_file = tmp_path / "..env"
     env_file.write_text(
         "\n".join(
             [
@@ -6837,7 +6837,7 @@ prompt_clearable_with_default() {{ printf '%s' "$CLEAR_INPUT_SENTINEL"; }}
 prompt_clearable_secret_with_default() {{ printf '%s' "$CLEAR_INPUT_SENTINEL"; }}
 
 collect_security_config yes no
-generate_env_file "{REPO_ROOT}/env.example" "$REPO_ROOT/.env.generated"
+generate_env_file "{REPO_ROOT}/.env.example" "$REPO_ROOT/..env.generated"
 
 printf 'AUTH_ACCOUNTS_SET=%s\\n' "${{ENV_VALUES[AUTH_ACCOUNTS]+set}}"
 printf 'TOKEN_SECRET_SET=%s\\n' "${{ENV_VALUES[TOKEN_SECRET]+set}}"
@@ -6848,7 +6848,7 @@ printf 'WHITELIST_PATHS_SET=%s\\n' "${{ENV_VALUES[WHITELIST_PATHS]+set}}"
     )
     values = parse_lines(output)
     generated_lines = (
-        (tmp_path / ".env.generated").read_text(encoding="utf-8").splitlines()
+        (tmp_path / "..env.generated").read_text(encoding="utf-8").splitlines()
     )
 
     assert values["AUTH_ACCOUNTS_SET"] == ""
@@ -6868,7 +6868,7 @@ def test_collect_security_config_preserves_explicit_empty_whitelist_on_rerun(
 ) -> None:
     """Rerunning security setup should keep an explicitly empty whitelist unchanged."""
 
-    env_file = tmp_path / ".env"
+    env_file = tmp_path / "..env"
     env_file.write_text("WHITELIST_PATHS=\n", encoding="utf-8")
 
     output = run_bash(
@@ -6899,7 +6899,7 @@ def test_collect_observability_config_clears_existing_values_on_rerun(
 ) -> None:
     """Rerunning setup should remove saved Langfuse settings when observability is declined."""
 
-    env_file = tmp_path / ".env"
+    env_file = tmp_path / "..env"
     env_file.write_text(
         "\n".join(
             [
@@ -6923,7 +6923,7 @@ load_existing_env_if_present
 
 
 collect_observability_config
-generate_env_file "{REPO_ROOT}/env.example" "$REPO_ROOT/.env.generated"
+generate_env_file "{REPO_ROOT}/.env.example" "$REPO_ROOT/..env.generated"
 
 printf 'LANGFUSE_ENABLE_TRACE_SET=%s\\n' "${{ENV_VALUES[LANGFUSE_ENABLE_TRACE]+set}}"
 printf 'LANGFUSE_SECRET_KEY_SET=%s\\n' "${{ENV_VALUES[LANGFUSE_SECRET_KEY]+set}}"
@@ -6933,7 +6933,7 @@ printf 'LANGFUSE_HOST_SET=%s\\n' "${{ENV_VALUES[LANGFUSE_HOST]+set}}"
     )
     values = parse_lines(output)
     generated_lines = (
-        (tmp_path / ".env.generated").read_text(encoding="utf-8").splitlines()
+        (tmp_path / "..env.generated").read_text(encoding="utf-8").splitlines()
     )
 
     assert values["LANGFUSE_ENABLE_TRACE_SET"] == ""
@@ -6961,7 +6961,7 @@ def test_collect_neo4j_config_bundled_service_keeps_username_editable(
                 "  lightrag:",
                 "    image: example/lightrag:test",
                 "    env_file:",
-                "      - .env",
+                "      - ..env",
             ]
         )
         + "\n",
@@ -7064,7 +7064,7 @@ set -euo pipefail
 source "{REPO_ROOT}/scripts/setup/setup.sh"
 reset_state
 
-ENV_VALUES[NEO4J_PASSWORD]="from-env-password"
+ENV_VALUES[NEO4J_PASSWORD]="from-.env-password"
 
 confirm_default_yes() {{ return 0; }}
 prompt_until_valid() {{ printf '%s' "$2"; }}
@@ -7078,7 +7078,7 @@ printf 'PASSWORD=%s\\n' "${{ENV_VALUES[NEO4J_PASSWORD]}}"
     )
     values = parse_lines(output)
 
-    assert values["PASSWORD"] == "from-env-password"
+    assert values["PASSWORD"] == "from-.env-password"
 
 
 def test_collect_neo4j_config_uses_existing_password_as_default_in_external_mode() -> (
@@ -7092,7 +7092,7 @@ set -euo pipefail
 source "{REPO_ROOT}/scripts/setup/setup.sh"
 reset_state
 
-ENV_VALUES[NEO4J_PASSWORD]="from-env-password"
+ENV_VALUES[NEO4J_PASSWORD]="from-.env-password"
 
 confirm_default_no() {{ return 1; }}
 prompt_until_valid() {{ printf '%s' "$2"; }}
@@ -7106,7 +7106,7 @@ printf 'PASSWORD=%s\\n' "${{ENV_VALUES[NEO4J_PASSWORD]}}"
     )
     values = parse_lines(output)
 
-    assert values["PASSWORD"] == "from-env-password"
+    assert values["PASSWORD"] == "from-.env-password"
 
 
 def test_collect_neo4j_config_bundled_service_reprompts_for_empty_credentials() -> None:
@@ -7292,7 +7292,7 @@ fi
 def test_security_check_reports_missing_authentication(tmp_path: Path) -> None:
     """Security audit should flag unauthenticated API exposure."""
 
-    write_text_lines(tmp_path / ".env", ["HOST=0.0.0.0"])
+    write_text_lines(tmp_path / "..env", ["HOST=0.0.0.0"])
 
     result = subprocess.run(
         [
@@ -7320,7 +7320,7 @@ def test_security_check_passes_for_authenticated_minimal_config(tmp_path: Path) 
     """Security audit should pass for a minimally hardened config."""
 
     write_text_lines(
-        tmp_path / ".env",
+        tmp_path / "..env",
         [
             "AUTH_ACCOUNTS=admin:secret",
             "TOKEN_SECRET=jwt-secret",
@@ -7355,7 +7355,7 @@ def test_security_check_reports_predictable_auth_password_prefix(
     """Security audit should flag AUTH_ACCOUNTS passwords with predictable prefixes."""
 
     write_text_lines(
-        tmp_path / ".env",
+        tmp_path / "..env",
         [
             "AUTH_ACCOUNTS=admin:admin123!",
             "TOKEN_SECRET=jwt-secret",
@@ -7390,7 +7390,7 @@ def test_security_check_reports_api_key_only_with_default_whitelist(
 ) -> None:
     """API-key-only deployment with unset WHITELIST_PATHS inherits /api/* and must be flagged."""
 
-    write_text_lines(tmp_path / ".env", ["LIGHTRAG_API_KEY=my-secret-key"])
+    write_text_lines(tmp_path / "..env", ["LIGHTRAG_API_KEY=my-secret-key"])
 
     result = subprocess.run(
         [
@@ -7420,7 +7420,7 @@ def test_security_check_reports_api_key_only_with_explicit_api_wildcard_whitelis
     """API-key-only deployment with WHITELIST_PATHS=/health,/api/* must be flagged."""
 
     write_text_lines(
-        tmp_path / ".env",
+        tmp_path / "..env",
         ["LIGHTRAG_API_KEY=my-secret-key", "WHITELIST_PATHS=/health,/api/*"],
     )
 
@@ -7452,7 +7452,7 @@ def test_security_check_passes_for_api_key_only_with_safe_whitelist(
     """API-key-only deployment with a safe WHITELIST_PATHS should pass the security check."""
 
     write_text_lines(
-        tmp_path / ".env",
+        tmp_path / "..env",
         ["LIGHTRAG_API_KEY=my-secret-key", "WHITELIST_PATHS=/health"],
     )
 
@@ -7484,7 +7484,7 @@ def test_security_check_ignores_default_opensearch_password_when_opensearch_unus
     """Security audit should ignore OpenSearch defaults when no OpenSearch storage is selected."""
 
     write_text_lines(
-        tmp_path / ".env",
+        tmp_path / "..env",
         [
             "AUTH_ACCOUNTS=admin:secret",
             "TOKEN_SECRET=jwt-secret",
@@ -7525,7 +7525,7 @@ def test_security_check_reports_default_opensearch_password_when_opensearch_sele
     """Security audit should flag the default OpenSearch password when OpenSearch is selected."""
 
     write_text_lines(
-        tmp_path / ".env",
+        tmp_path / "..env",
         [
             "AUTH_ACCOUNTS=admin:secret",
             "TOKEN_SECRET=jwt-secret",
@@ -7623,7 +7623,7 @@ def test_validate_env_file_handles_supported_and_unsupported_uri_schemes(
         case_dir = tmp_path / case_name
         case_dir.mkdir()
         write_text_lines(
-            case_dir / ".env",
+            case_dir / "..env",
             [
                 "LIGHTRAG_KV_STORAGE=JsonKVStorage",
                 "LIGHTRAG_VECTOR_STORAGE=NanoVectorDBStorage",
@@ -7632,7 +7632,7 @@ def test_validate_env_file_handles_supported_and_unsupported_uri_schemes(
                 *extra_lines,
             ],
         )
-        write_text_lines(case_dir / "env.example", ["LLM_BINDING=openai"])
+        write_text_lines(case_dir / ".env.example", ["LLM_BINDING=openai"])
 
         result = subprocess.run(
             [
@@ -7667,7 +7667,7 @@ def test_validate_env_file_rejects_invalid_runtime_target(tmp_path: Path) -> Non
     """validate_env_file should reject unsupported LIGHTRAG_RUNTIME_TARGET values."""
 
     write_text_lines(
-        tmp_path / ".env",
+        tmp_path / "..env",
         [
             "LIGHTRAG_RUNTIME_TARGET=laptop",
             "LIGHTRAG_KV_STORAGE=JsonKVStorage",
@@ -7676,7 +7676,7 @@ def test_validate_env_file_rejects_invalid_runtime_target(tmp_path: Path) -> Non
             "LIGHTRAG_DOC_STATUS_STORAGE=JsonDocStatusStorage",
         ],
     )
-    write_text_lines(tmp_path / "env.example", ["LLM_BINDING=openai"])
+    write_text_lines(tmp_path / ".env.example", ["LLM_BINDING=openai"])
 
     result = subprocess.run(
         [
@@ -7817,7 +7817,7 @@ printf 'VERIFY_CERTS=%s\\n' "${{ENV_VALUES[OPENSEARCH_VERIFY_CERTS]}}"
 
 
 def test_collect_opensearch_config_defaults_docker_tls_flags_when_unset() -> None:
-    """collect_opensearch_config should supply Docker TLS defaults when .env has no values."""
+    """collect_opensearch_config should supply Docker TLS defaults when ..env has no values."""
 
     values = run_bash_lines(
         f"""
@@ -7981,7 +7981,7 @@ def test_validate_env_file_rejects_invalid_opensearch_index_settings(
     """validate_env_file should reject invalid OpenSearch shard and replica counts."""
 
     write_text_lines(
-        tmp_path / ".env",
+        tmp_path / "..env",
         [
             "LIGHTRAG_KV_STORAGE=OpenSearchKVStorage",
             "LIGHTRAG_VECTOR_STORAGE=OpenSearchVectorDBStorage",
@@ -7994,7 +7994,7 @@ def test_validate_env_file_rejects_invalid_opensearch_index_settings(
             "OPENSEARCH_NUMBER_OF_REPLICAS=-1",
         ],
     )
-    write_text_lines(tmp_path / "env.example", ["LLM_BINDING=openai"])
+    write_text_lines(tmp_path / ".env.example", ["LLM_BINDING=openai"])
 
     result = subprocess.run(
         [
@@ -8029,7 +8029,7 @@ def test_validate_env_file_rejects_blank_opensearch_index_settings(
     """validate_env_file should reject blank OpenSearch shard and replica counts."""
 
     write_text_lines(
-        tmp_path / ".env",
+        tmp_path / "..env",
         [
             "LIGHTRAG_KV_STORAGE=OpenSearchKVStorage",
             "LIGHTRAG_VECTOR_STORAGE=OpenSearchVectorDBStorage",
@@ -8042,7 +8042,7 @@ def test_validate_env_file_rejects_blank_opensearch_index_settings(
             "OPENSEARCH_NUMBER_OF_REPLICAS=",
         ],
     )
-    write_text_lines(tmp_path / "env.example", ["LLM_BINDING=openai"])
+    write_text_lines(tmp_path / ".env.example", ["LLM_BINDING=openai"])
 
     result = subprocess.run(
         [
@@ -8102,7 +8102,7 @@ def test_validate_env_file_rejects_mongo_vector_storage_without_atlas_uri(
 ) -> None:
     """validate_env_file must reject MongoVectorDBStorage when MONGO_URI is not Atlas (mongodb+srv://)."""
 
-    env_file = tmp_path / ".env"
+    env_file = tmp_path / "..env"
     env_file.write_text(
         "\n".join(
             [
@@ -8116,7 +8116,7 @@ def test_validate_env_file_rejects_mongo_vector_storage_without_atlas_uri(
         + "\n",
         encoding="utf-8",
     )
-    (tmp_path / "env.example").write_text("LLM_BINDING=openai\n", encoding="utf-8")
+    (tmp_path / ".env.example").write_text("LLM_BINDING=openai\n", encoding="utf-8")
 
     result = subprocess.run(
         [
@@ -8149,7 +8149,7 @@ fi
 def test_validate_env_file_rejects_empty_opensearch_hosts(tmp_path: Path) -> None:
     """validate_env_file should reject an explicitly empty OPENSEARCH_HOSTS setting."""
 
-    env_file = tmp_path / ".env"
+    env_file = tmp_path / "..env"
     env_file.write_text(
         "\n".join(
             [
@@ -8163,7 +8163,7 @@ def test_validate_env_file_rejects_empty_opensearch_hosts(tmp_path: Path) -> Non
         + "\n",
         encoding="utf-8",
     )
-    (tmp_path / "env.example").write_text("LLM_BINDING=openai\n", encoding="utf-8")
+    (tmp_path / ".env.example").write_text("LLM_BINDING=openai\n", encoding="utf-8")
 
     result = subprocess.run(
         [
@@ -8198,7 +8198,7 @@ def test_validate_env_file_rejects_whitespace_only_opensearch_hosts(
 ) -> None:
     """validate_env_file should reject OpenSearch host lists with only blank entries."""
 
-    env_file = tmp_path / ".env"
+    env_file = tmp_path / "..env"
     env_file.write_text(
         "\n".join(
             [
@@ -8214,7 +8214,7 @@ def test_validate_env_file_rejects_whitespace_only_opensearch_hosts(
         + "\n",
         encoding="utf-8",
     )
-    (tmp_path / "env.example").write_text("LLM_BINDING=openai\n", encoding="utf-8")
+    (tmp_path / ".env.example").write_text("LLM_BINDING=openai\n", encoding="utf-8")
 
     result = subprocess.run(
         [
@@ -8249,7 +8249,7 @@ def test_validate_env_file_rejects_docker_opensearch_without_password(
 ) -> None:
     """validate_env_file should reject bundled OpenSearch when auth is incomplete."""
 
-    env_file = tmp_path / ".env"
+    env_file = tmp_path / "..env"
     env_file.write_text(
         "\n".join(
             [
@@ -8265,7 +8265,7 @@ def test_validate_env_file_rejects_docker_opensearch_without_password(
         + "\n",
         encoding="utf-8",
     )
-    (tmp_path / "env.example").write_text("LLM_BINDING=openai\n", encoding="utf-8")
+    (tmp_path / ".env.example").write_text("LLM_BINDING=openai\n", encoding="utf-8")
 
     result = subprocess.run(
         [
@@ -8303,7 +8303,7 @@ def test_validate_env_file_rejects_weak_docker_opensearch_password(
 ) -> None:
     """validate_env_file should reject bundled OpenSearch passwords the image will refuse."""
 
-    env_file = tmp_path / ".env"
+    env_file = tmp_path / "..env"
     env_file.write_text(
         "\n".join(
             [
@@ -8320,7 +8320,7 @@ def test_validate_env_file_rejects_weak_docker_opensearch_password(
         + "\n",
         encoding="utf-8",
     )
-    (tmp_path / "env.example").write_text("LLM_BINDING=openai\n", encoding="utf-8")
+    (tmp_path / ".env.example").write_text("LLM_BINDING=openai\n", encoding="utf-8")
 
     result = subprocess.run(
         [
@@ -8355,7 +8355,7 @@ def test_validate_env_file_rejects_weak_host_opensearch_password(
 ) -> None:
     """validate_env_file should reject weak OpenSearch passwords even for host deployments."""
 
-    env_file = tmp_path / ".env"
+    env_file = tmp_path / "..env"
     env_file.write_text(
         "\n".join(
             [
@@ -8371,7 +8371,7 @@ def test_validate_env_file_rejects_weak_host_opensearch_password(
         + "\n",
         encoding="utf-8",
     )
-    (tmp_path / "env.example").write_text("LLM_BINDING=openai\n", encoding="utf-8")
+    (tmp_path / ".env.example").write_text("LLM_BINDING=openai\n", encoding="utf-8")
 
     result = subprocess.run(
         [
@@ -8406,7 +8406,7 @@ def test_validate_env_file_rejects_unauthenticated_host_opensearch(
 ) -> None:
     """validate_env_file should reject host-mode OpenSearch with no auth fields."""
 
-    env_file = tmp_path / ".env"
+    env_file = tmp_path / "..env"
     env_file.write_text(
         "\n".join(
             [
@@ -8420,7 +8420,7 @@ def test_validate_env_file_rejects_unauthenticated_host_opensearch(
         + "\n",
         encoding="utf-8",
     )
-    (tmp_path / "env.example").write_text("LLM_BINDING=openai\n", encoding="utf-8")
+    (tmp_path / ".env.example").write_text("LLM_BINDING=openai\n", encoding="utf-8")
 
     result = subprocess.run(
         [
@@ -8456,7 +8456,7 @@ def test_validate_env_file_rejects_partial_host_opensearch_auth(
 ) -> None:
     """validate_env_file should reject host-mode OpenSearch when only one auth field is set."""
 
-    env_file = tmp_path / ".env"
+    env_file = tmp_path / "..env"
     env_file.write_text(
         "\n".join(
             [
@@ -8471,7 +8471,7 @@ def test_validate_env_file_rejects_partial_host_opensearch_auth(
         + "\n",
         encoding="utf-8",
     )
-    (tmp_path / "env.example").write_text("LLM_BINDING=openai\n", encoding="utf-8")
+    (tmp_path / ".env.example").write_text("LLM_BINDING=openai\n", encoding="utf-8")
 
     result = subprocess.run(
         [
@@ -8506,7 +8506,7 @@ def test_validate_env_file_rejects_opensearch_hosts_with_uri_scheme(
 ) -> None:
     """validate_env_file should require OPENSEARCH_HOSTS to stay as host:port entries."""
 
-    env_file = tmp_path / ".env"
+    env_file = tmp_path / "..env"
     env_file.write_text(
         "\n".join(
             [
@@ -8522,7 +8522,7 @@ def test_validate_env_file_rejects_opensearch_hosts_with_uri_scheme(
         + "\n",
         encoding="utf-8",
     )
-    (tmp_path / "env.example").write_text("LLM_BINDING=openai\n", encoding="utf-8")
+    (tmp_path / ".env.example").write_text("LLM_BINDING=openai\n", encoding="utf-8")
 
     result = subprocess.run(
         [
@@ -8559,7 +8559,7 @@ def test_validate_env_file_ignores_invalid_unused_storage_settings(
 ) -> None:
     """validate_env_file should ignore malformed settings for backends not selected by storage."""
 
-    env_file = tmp_path / ".env"
+    env_file = tmp_path / "..env"
     env_file.write_text(
         "\n".join(
             [
@@ -8579,7 +8579,7 @@ def test_validate_env_file_ignores_invalid_unused_storage_settings(
         + "\n",
         encoding="utf-8",
     )
-    (tmp_path / "env.example").write_text("LLM_BINDING=openai\n", encoding="utf-8")
+    (tmp_path / ".env.example").write_text("LLM_BINDING=openai\n", encoding="utf-8")
 
     result = subprocess.run(
         [
@@ -8620,7 +8620,7 @@ def test_validate_env_file_allows_empty_opensearch_hosts_when_unused(
 ) -> None:
     """validate_env_file should ignore blank OpenSearch hosts when no OpenSearch storage is selected."""
 
-    env_file = tmp_path / ".env"
+    env_file = tmp_path / "..env"
     env_file.write_text(
         "\n".join(
             [
@@ -8634,7 +8634,7 @@ def test_validate_env_file_allows_empty_opensearch_hosts_when_unused(
         + "\n",
         encoding="utf-8",
     )
-    (tmp_path / "env.example").write_text("LLM_BINDING=openai\n", encoding="utf-8")
+    (tmp_path / ".env.example").write_text("LLM_BINDING=openai\n", encoding="utf-8")
 
     result = subprocess.run(
         [
@@ -8665,7 +8665,7 @@ fi
 
 
 def test_backup_only_backs_up_env_and_generated_compose(tmp_path: Path) -> None:
-    """backup_only should back up both .env and the active generated compose file."""
+    """backup_only should back up both ..env and the active generated compose file."""
 
     compose_content = (
         "\n".join(
@@ -8678,7 +8678,7 @@ def test_backup_only_backs_up_env_and_generated_compose(tmp_path: Path) -> None:
         + "\n"
     )
 
-    write_text_lines(tmp_path / ".env", ["HOST=0.0.0.0"])
+    write_text_lines(tmp_path / "..env", ["HOST=0.0.0.0"])
     (tmp_path / "docker-compose.final.yml").write_text(
         compose_content,
         encoding="utf-8",
@@ -8694,10 +8694,10 @@ backup_only
 """
     )
 
-    env_backups = sorted(tmp_path.glob(".env.backup.*"))
+    env_backups = sorted(tmp_path.glob("..env.backup.*"))
     assert len(env_backups) == 1
     assert env_backups[0].read_text(encoding="utf-8") == "HOST=0.0.0.0\n"
-    assert "Backed up .env to" in output
+    assert "Backed up ..env to" in output
     assert "Backed up compose file to" in output
     assert_single_compose_backup(tmp_path, compose_content)
 
@@ -8705,9 +8705,9 @@ backup_only
 def test_backup_only_skips_compose_backup_when_no_generated_compose_exists(
     tmp_path: Path,
 ) -> None:
-    """backup_only should still succeed when only .env exists."""
+    """backup_only should still succeed when only ..env exists."""
 
-    write_text_lines(tmp_path / ".env", ["HOST=0.0.0.0"])
+    write_text_lines(tmp_path / "..env", ["HOST=0.0.0.0"])
 
     output = run_bash(
         f"""
@@ -8719,8 +8719,8 @@ backup_only
 """
     )
 
-    env_backups = sorted(tmp_path.glob(".env.backup.*"))
+    env_backups = sorted(tmp_path.glob("..env.backup.*"))
     assert len(env_backups) == 1
-    assert "Backed up .env to" in output
+    assert "Backed up ..env to" in output
     assert "Backed up compose file to" not in output
     assert list(tmp_path.glob("docker-compose.backup*.yml")) == []

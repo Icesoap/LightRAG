@@ -1,4 +1,4 @@
-"""Helpers for validating startup runtime expectations from `.env`."""
+"""Helpers for validating startup runtime expectations from `..env`."""
 
 from __future__ import annotations
 
@@ -69,8 +69,8 @@ def detect_runtime_environment(
     )
 
 
-def load_runtime_target_from_env_file(env_path: str | Path = ".env") -> str | None:
-    """Return the raw LIGHTRAG_RUNTIME_TARGET value from the `.env` file, if present."""
+def load_runtime_target_from_env_file(env_path: str | Path = "..env") -> str | None:
+    """Return the raw LIGHTRAG_RUNTIME_TARGET value from the `..env` file, if present."""
 
     env_values = dotenv_values(str(env_path))
     runtime_target = env_values.get("LIGHTRAG_RUNTIME_TARGET")
@@ -83,7 +83,7 @@ def validate_runtime_target(
     runtime_target: str | None,
     runtime_environment: RuntimeEnvironment | None = None,
 ) -> tuple[bool, str | None]:
-    """Validate `.env` runtime target against the current runtime environment."""
+    """Validate `..env` runtime target against the current runtime environment."""
 
     if runtime_target is None:
         return True, None
@@ -95,8 +95,8 @@ def validate_runtime_target(
         if runtime_environment.in_container:
             return (
                 False,
-                "Configuration error in .env: LIGHTRAG_RUNTIME_TARGET=host.\n"
-                "This value from .env requires the server process to run on the host, "
+                "Configuration error in ..env: LIGHTRAG_RUNTIME_TARGET=host.\n"
+                "This value from ..env requires the server process to run on the host, "
                 f"but the current process is running inside {runtime_environment.label}.",
             )
         return True, None
@@ -106,23 +106,23 @@ def validate_runtime_target(
             return True, None
         return (
             False,
-            f"Configuration error in .env: LIGHTRAG_RUNTIME_TARGET={runtime_target}.\n"
-            "This value from .env requires the server process to run inside Docker or "
+            f"Configuration error in ..env: LIGHTRAG_RUNTIME_TARGET={runtime_target}.\n"
+            "This value from ..env requires the server process to run inside Docker or "
             "Kubernetes, but the current process is running on the host.",
         )
 
     return (
         False,
-        f"Configuration error in .env: LIGHTRAG_RUNTIME_TARGET={runtime_target!r}.\n"
-        "This value from .env must be 'host' or 'compose' (alias: 'docker').",
+        f"Configuration error in ..env: LIGHTRAG_RUNTIME_TARGET={runtime_target!r}.\n"
+        "This value from ..env must be 'host' or 'compose' (alias: 'docker').",
     )
 
 
 def validate_runtime_target_from_env_file(
-    env_path: str | Path = ".env",
+    env_path: str | Path = "..env",
     runtime_environment: RuntimeEnvironment | None = None,
 ) -> tuple[bool, str | None]:
-    """Load LIGHTRAG_RUNTIME_TARGET from `.env` and validate it if declared."""
+    """Load LIGHTRAG_RUNTIME_TARGET from `..env` and validate it if declared."""
 
     runtime_target = load_runtime_target_from_env_file(env_path)
     return validate_runtime_target(runtime_target, runtime_environment)

@@ -69,10 +69,10 @@ from lightrag.kg.shared_storage import get_storage_keyed_lock
 import time
 from dotenv import load_dotenv
 
-# use the .env that is inside the current folder
-# allows to use different .env file for each lightrag instance
-# the OS environment variables take precedence over the .env file
-load_dotenv(dotenv_path=Path(__file__).resolve().parent / ".env", override=False)
+# use the ..env that is inside the current folder
+# allows to use different ..env file for each lightrag instance
+# the OS environment variables take precedence over the ..env file
+load_dotenv(dotenv_path=Path(__file__).resolve().parent / "..env", override=False)
 
 
 def _truncate_entity_identifier(
@@ -4155,6 +4155,7 @@ async def _build_context_str(
     return result, final_data
 
 
+# _build_query_context 构建查询上下文,引用问题的核心在这
 # Now let's update the old _build_query_context to use the new architecture
 async def _build_query_context(
     query: str,
@@ -4205,6 +4206,7 @@ async def _build_query_context(
         text_chunks_db.global_config,
     )
 
+    # 阶段 3：使用 过滤后的实体/关系 对数据块进行合并
     # Stage 3: Merge chunks using filtered entities/relations
     merged_chunks = await _merge_all_chunks(
         filtered_entities=truncation_result["filtered_entities"],

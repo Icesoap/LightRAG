@@ -23,15 +23,15 @@ format_env_value() {
   fi
 
   if [[ "$value" =~ [[:space:]] || "$value" == *"\""* || "$value" == *"$"* || "$value" == *"#"* ]]; then
-    # Prefer single quotes when quoting is required so generated .env values
-    # match env.example style and remain Compose-friendly. Fall back to
+    # Prefer single quotes when quoting is required so generated ..env values
+    # match .env.example style and remain Compose-friendly. Fall back to
     # double quotes only when the value itself contains a single quote.
     if [[ "$value" != *"'"* ]]; then
       printf "'%s'" "$value"
       return
     fi
 
-    # Double-quoted .env values only need escaping for backslash and double quote.
+    # Double-quoted ..env values only need escaping for backslash and double quote.
     # Do not escape '$': python-dotenv preserves plain '$' literally, while '\$'
     # changes the loaded value.
     # '#' in unquoted values is treated as a comment by python-dotenv, so any
@@ -46,7 +46,7 @@ format_env_value() {
 }
 
 backup_env_file() {
-  local env_file="${1:-${REPO_ROOT:-.}/.env}"
+  local env_file="${1:-${REPO_ROOT:-.}/..env}"
   local backup_file=""
 
   if [[ -f "$env_file" ]]; then
@@ -153,8 +153,8 @@ resolve_staged_ssl_basename() {
 }
 
 generate_env_file() {
-  local template_file="${1:-${REPO_ROOT:-.}/env.example}"
-  local output_file="${2:-${REPO_ROOT:-.}/.env}"
+  local template_file="${1:-${REPO_ROOT:-.}/.env.example}"
+  local output_file="${2:-${REPO_ROOT:-.}/..env}"
   local tmp_file="${output_file}.tmp"
   _FILE_OPS_CLEANUP_TMP+=("$tmp_file")
   local line key value
@@ -1109,7 +1109,7 @@ generate_docker_compose() {
 }
 
 prepare_lightrag_service_for_generated_compose() {
-  # Let the containerized app read the mounted .env itself. Keeping env_file
+  # Let the containerized app read the mounted ..env itself. Keeping env_file
   # here would make Docker Compose re-parse the same secrets and expand '$'.
   local compose_file="$1"
   local tmp_file="${compose_file}.strip-env-file"

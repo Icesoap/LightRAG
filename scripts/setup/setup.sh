@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/.env bash
 set -euo pipefail
 
 if [[ -z "${BASH_VERSINFO+x}" || "${BASH_VERSINFO[0]}" -lt 4 ]]; then
@@ -593,7 +593,7 @@ prepare_compose_ssl_overrides() {
 
 prepare_compose_data_path_overrides() {
   # Compose mounts always bind the data directories into these container paths.
-  # Force lightrag to use them so values from the mounted .env cannot redirect
+  # Force lightrag to use them so values from the mounted ..env cannot redirect
   # storage into a different location.
   set_compose_override "WORKING_DIR" "$COMPOSE_LIGHTRAG_WORKING_DIR"
   set_compose_override "INPUT_DIR" "$COMPOSE_LIGHTRAG_INPUT_DIR"
@@ -963,8 +963,8 @@ select_storage_backends() {
 }
 
 initialize_default_storage_backends() {
-  # env-base does not prompt for storage, but its generated .env must remain
-  # self-consistent for first-run users who have not run env-storage yet.
+  # .env-base does not prompt for storage, but its generated ..env must remain
+  # self-consistent for first-run users who have not run .env-storage yet.
   ENV_VALUES["LIGHTRAG_KV_STORAGE"]="${ENV_VALUES[LIGHTRAG_KV_STORAGE]:-JsonKVStorage}"
   ENV_VALUES["LIGHTRAG_VECTOR_STORAGE"]="${ENV_VALUES[LIGHTRAG_VECTOR_STORAGE]:-NanoVectorDBStorage}"
   ENV_VALUES["LIGHTRAG_GRAPH_STORAGE"]="${ENV_VALUES[LIGHTRAG_GRAPH_STORAGE]:-NetworkXStorage}"
@@ -1073,13 +1073,13 @@ collect_database_config() {
   local deployment_mode="no"
 
   # Storage collector rule for this wizard:
-  # - Existing ENV_VALUES loaded from .env are user-owned configuration.
+  # - Existing ENV_VALUES loaded from ..env are user-owned configuration.
   # - Collectors should use those values as defaults and preserve them when they
   #   are already set, even for Docker-managed services.
   # - A collector may normalize the stored form, or write a hard default only
   #   when the key is absent.
   # Keep future storage collectors aligned with this behavior so rerunning the
-  # wizard does not silently erase explicit .env overrides.
+  # wizard does not silently erase explicit ..env overrides.
 
   case "$db_type" in
     postgresql)
@@ -2100,9 +2100,9 @@ show_summary() {
 }
 
 # Preserve already-staged SSL mounts when regenerating compose output. The
-# setup wizards treat .env as the configuration for the current target runtime,
+# setup wizards treat ..env as the configuration for the current target runtime,
 # not as a single file guaranteed to work for both host and Docker Compose at
-# the same time. A later wizard run may rewrite .env again when the operator
+# the same time. A later wizard run may rewrite ..env again when the operator
 # switches between host and compose workflows.
 prepare_inherited_ssl_assets_for_compose() {
   local existing_compose="${1:-}"

@@ -78,7 +78,7 @@ helm upgrade --install lightrag $SCRIPT_DIR/lightrag \
   --set-string env.EMBEDDING_MODEL=text-embedding-ada-002 \
   --set-string env.EMBEDDING_DIM=1536 \
   --set-string env.EMBEDDING_BINDING_API_KEY=$OPENAI_API_KEY
-#  --set-string env.REDIS_URI="redis://default:${REDIS_PASSWORD}@redis-cluster-redis-redis:6379"
+#  --set-string .env.REDIS_URI="redis://default:${REDIS_PASSWORD}@redis-cluster-redis-redis:6379"
 
 # Wait for LightRAG pod to be ready
 echo ""

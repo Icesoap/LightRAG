@@ -44,10 +44,12 @@ from lightrag.constants import (
     DEFAULT_ENTITY_TYPES,
 )
 
-# use the .env that is inside the current folder
-# allows to use different .env file for each lightrag instance
-# the OS environment variables take precedence over the .env file
-load_dotenv(dotenv_path=".env", override=False)
+# use the ..env that is inside the current folder
+# allows to use different ..env file for each lightrag instance
+# the OS environment variables take precedence over the ..env file
+load_dotenv(dotenv_path=r"./.env", override=False)
+print(os.getenv("LLM_MODEL"))
+print(os.getenv("LIGHTRAG_VECTOR_STORAGE"))
 
 
 ollama_server_infos = OllamaServerInfos()
@@ -92,25 +94,25 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--host",
         default=get_env_value("HOST", "0.0.0.0"),
-        help="Server host (default: from env or 0.0.0.0)",
+        help="Server host (default: from .env or 0.0.0.0)",
     )
     parser.add_argument(
         "--port",
         type=int,
         default=get_env_value("PORT", 9621, int),
-        help="Server port (default: from env or 9621)",
+        help="Server port (default: from .env or 9621)",
     )
 
     # Directory configuration
     parser.add_argument(
         "--working-dir",
         default=get_env_value("WORKING_DIR", "./rag_storage"),
-        help="Working directory for RAG storage (default: from env or ./rag_storage)",
+        help="Working directory for RAG storage (default: from .env or ./rag_storage)",
     )
     parser.add_argument(
         "--input-dir",
         default=get_env_value("INPUT_DIR", "./inputs"),
-        help="Directory containing input documents (default: from env or ./inputs)",
+        help="Directory containing input documents (default: from .env or ./inputs)",
     )
 
     parser.add_argument(
@@ -125,13 +127,13 @@ def parse_args() -> argparse.Namespace:
         "--max-async",
         type=int,
         default=get_env_value("MAX_ASYNC", DEFAULT_MAX_ASYNC, int),
-        help=f"Maximum async operations (default: from env or {DEFAULT_MAX_ASYNC})",
+        help=f"Maximum async operations (default: from .env or {DEFAULT_MAX_ASYNC})",
     )
     parser.add_argument(
         "--summary-max-tokens",
         type=int,
         default=get_env_value("SUMMARY_MAX_TOKENS", DEFAULT_SUMMARY_MAX_TOKENS, int),
-        help=f"Maximum token size for entity/relation summary(default: from env or {DEFAULT_SUMMARY_MAX_TOKENS})",
+        help=f"Maximum token size for entity/relation summary(default: from .env or {DEFAULT_SUMMARY_MAX_TOKENS})",
     )
     parser.add_argument(
         "--summary-context-size",
@@ -139,7 +141,7 @@ def parse_args() -> argparse.Namespace:
         default=get_env_value(
             "SUMMARY_CONTEXT_SIZE", DEFAULT_SUMMARY_CONTEXT_SIZE, int
         ),
-        help=f"LLM Summary Context size (default: from env or {DEFAULT_SUMMARY_CONTEXT_SIZE})",
+        help=f"LLM Summary Context size (default: from .env or {DEFAULT_SUMMARY_CONTEXT_SIZE})",
     )
     parser.add_argument(
         "--summary-length-recommended",
@@ -147,7 +149,7 @@ def parse_args() -> argparse.Namespace:
         default=get_env_value(
             "SUMMARY_LENGTH_RECOMMENDED", DEFAULT_SUMMARY_LENGTH_RECOMMENDED, int
         ),
-        help=f"LLM Summary Context size (default: from env or {DEFAULT_SUMMARY_LENGTH_RECOMMENDED})",
+        help=f"LLM Summary Context size (default: from .env or {DEFAULT_SUMMARY_LENGTH_RECOMMENDED})",
     )
 
     # Logging configuration
@@ -155,7 +157,7 @@ def parse_args() -> argparse.Namespace:
         "--log-level",
         default=get_env_value("LOG_LEVEL", "INFO"),
         choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
-        help="Logging level (default: from env or INFO)",
+        help="Logging level (default: from .env or INFO)",
     )
     parser.add_argument(
         "--verbose",
@@ -176,7 +178,7 @@ def parse_args() -> argparse.Namespace:
         "--ssl",
         action="store_true",
         default=get_env_value("SSL", False, bool),
-        help="Enable HTTPS (default: from env or False)",
+        help="Enable HTTPS (default: from .env or False)",
     )
     parser.add_argument(
         "--ssl-certfile",
@@ -194,14 +196,14 @@ def parse_args() -> argparse.Namespace:
         "--simulated-model-name",
         type=str,
         default=get_env_value("OLLAMA_EMULATING_MODEL_NAME", DEFAULT_OLLAMA_MODEL_NAME),
-        help="Name for the simulated Ollama model (default: from env or lightrag)",
+        help="Name for the simulated Ollama model (default: from .env or lightrag)",
     )
 
     parser.add_argument(
         "--simulated-model-tag",
         type=str,
         default=get_env_value("OLLAMA_EMULATING_MODEL_TAG", DEFAULT_OLLAMA_MODEL_TAG),
-        help="Tag for the simulated Ollama model (default: from env or latest)",
+        help="Tag for the simulated Ollama model (default: from .env or latest)",
     )
 
     # Namespace
@@ -217,7 +219,7 @@ def parse_args() -> argparse.Namespace:
         "--workers",
         type=int,
         default=get_env_value("WORKERS", DEFAULT_WOKERS, int),
-        help="Number of worker processes (default: from env or 1)",
+        help="Number of worker processes (default: from .env or 1)",
     )
 
     # LLM and embedding bindings
@@ -234,7 +236,7 @@ def parse_args() -> argparse.Namespace:
             "aws_bedrock",
             "gemini",
         ],
-        help="LLM binding type (default: from env or ollama)",
+        help="LLM binding type (default: from .env or ollama)",
     )
     parser.add_argument(
         "--embedding-binding",
@@ -249,14 +251,14 @@ def parse_args() -> argparse.Namespace:
             "jina",
             "gemini",
         ],
-        help="Embedding binding type (default: from env or ollama)",
+        help="Embedding binding type (default: from .env or ollama)",
     )
     parser.add_argument(
         "--rerank-binding",
         type=str,
         default=get_env_value("RERANK_BINDING", DEFAULT_RERANK_BINDING),
         choices=["null", "cohere", "jina", "aliyun"],
-        help=f"Rerank binding type (default: from env or {DEFAULT_RERANK_BINDING})",
+        help=f"Rerank binding type (default: from .env or {DEFAULT_RERANK_BINDING})",
     )
 
     # Document loading engine configuration
@@ -264,7 +266,7 @@ def parse_args() -> argparse.Namespace:
         "--docling",
         action="store_true",
         default=False,
-        help="Enable DOCLING document loading engine (default: from env or DEFAULT)",
+        help="Enable DOCLING document loading engine (default: from .env or DEFAULT)",
     )
 
     # Conditionally add binding-specific options (Ollama, OpenAI, Azure OpenAI, Gemini)
@@ -410,7 +412,7 @@ def parse_args() -> argparse.Namespace:
     args.rerank_model = get_env_value("RERANK_MODEL", None)
     args.rerank_binding_host = get_env_value("RERANK_BINDING_HOST", None)
     args.rerank_binding_api_key = get_env_value("RERANK_BINDING_API_KEY", None)
-    # Note: rerank_binding is already set by argparse, no need to override from env
+    # Note: rerank_binding is already set by argparse, no need to override from .env
 
     # Min rerank score configuration
     args.min_rerank_score = get_env_value(

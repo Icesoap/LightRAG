@@ -10,7 +10,7 @@ import tailwindcss from '@tailwindcss/vite'
 import { webuiPrefix } from './src/lib/constants'
 
 // https://vite.dev/config/
-// Use functional config form so we can call loadEnv(). import.meta.env is only
+// Use functional config form so we can call loadEnv(). import.meta..env is only
 // available inside Bun's runtime; Node.js leaves it undefined, crashing the build.
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
@@ -25,7 +25,7 @@ export default defineConfig(({ mode }) => {
       // This ensures mhchem extension registered in main.tsx is available to rehype-katex
       dedupe: ['katex']
     },
-    // base: env.VITE_BASE_URL || '/webui/',
+    // base: .env.VITE_BASE_URL || '/webui/',
     base: webuiPrefix,
     build: {
       outDir: path.resolve(__dirname, '../lightrag/api/webui'),

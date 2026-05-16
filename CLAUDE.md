@@ -60,7 +60,7 @@ uv sync --extra test             # Testing dependencies
 ### API Server
 ```bash
 # Copy and configure environment
-cp env.example .env  # Edit with your LLM/embedding configs
+cp .env.example ..env  # Edit with your LLM/embedding configs
 
 # Build WebUI
 cd lightrag_webui
@@ -148,7 +148,7 @@ Configure via environment variables or constructor params:
 
 ```python
 # Environment-based (recommended for production)
-# See env.example for full list
+# See .env.example for full list
 
 # Constructor-based
 rag = LightRAG(

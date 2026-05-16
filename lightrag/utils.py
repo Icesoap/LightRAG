@@ -182,7 +182,7 @@ def get_env_value(
 
     Args:
         env_key (str): Environment variable key
-        default (any): Default value if env variable is not set
+        default (any): Default value if .env variable is not set
         value_type (type): Type to convert the value to
         special_none (bool): If True, return None when value is "None"
 
@@ -230,10 +230,10 @@ def get_env_value(
 if TYPE_CHECKING:
     from lightrag.base import BaseKVStorage, BaseVectorStorage, QueryParam
 
-# use the .env that is inside the current folder
-# allows to use different .env file for each lightrag instance
-# the OS environment variables take precedence over the .env file
-load_dotenv(dotenv_path=".env", override=False)
+# use the ..env that is inside the current folder
+# allows to use different ..env file for each lightrag instance
+# the OS environment variables take precedence over the ..env file
+load_dotenv(dotenv_path="..env", override=False)
 
 VERBOSE_DEBUG = os.getenv("VERBOSE", "false").lower() == "true"
 

@@ -11,7 +11,7 @@ from lightrag.utils import EmbeddingFunc, logger, set_verbose_debug
 
 from dotenv import load_dotenv
 
-load_dotenv(dotenv_path=".env", override=False)
+load_dotenv(dotenv_path="..env", override=False)
 
 WORKING_DIR = "./dickens"
 

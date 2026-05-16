@@ -137,7 +137,7 @@ class TestMilvusKwargsParameterBridge:
                 "MILVUS_HNSW_M": "16",
             },
         ):
-            # Create storage with kwargs parameters that should override env vars
+            # Create storage with kwargs parameters that should override .env vars
             storage = MilvusVectorDBStorage(
                 namespace="test_entities",
                 workspace="test_workspace",

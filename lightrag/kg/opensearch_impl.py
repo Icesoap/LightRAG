@@ -132,7 +132,7 @@ class ClientManager:
 
 
 def _resolve_workspace(workspace: str, namespace: str):
-    """Resolve effective workspace from env or parameter."""
+    """Resolve effective workspace from .env or parameter."""
     opensearch_workspace = os.environ.get("OPENSEARCH_WORKSPACE")
     if opensearch_workspace and opensearch_workspace.strip():
         effective = opensearch_workspace.strip()
