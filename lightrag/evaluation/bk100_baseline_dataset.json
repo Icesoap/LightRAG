@@ -1,0 +1,54 @@
+{
+  "test_cases": [
+    {
+      "question": "表架弧形板(BK100)的物料版本、状态和创建时间是什么？",
+      "ground_truth": "表架弧形板(BK100)的物料版本是1，版本状态为草稿，创建时间是2023/10/27 18:45:23。该物料由系统管理员创建，物料类别为样品，尺寸为3423，有效性状态为是。",
+      "project": "BK100_baseline_test"
+    },
+    {
+      "question": "座架组装(BK100).SLDASM装配体包含哪些子组件？请列出PartReversionId。",
+      "ground_truth": "座架组装(BK100).SLDASM是一个装配对象，BOM版本为1，外部Id为443，创建于2026/4/9 14:41:11。该装配体包含多个子组件，其BomRelation中记录的PartReversionId包括：b1ad5eef-94c5-4863-aa24-8ecc0dada312、3d32a934-320e-49ef-8376-a607a2bdb54f、3c70b748-75f1-4cf1-bc21-5d0acbb41e53、d57aeb9a-255c-4923-8273-d7f8bbfa9591、72033391-fa50-4d18-a254-a730fbbe8de7、46233cec-305f-49b0-ba44-3c824e149726。",
+      "project": "BK100_baseline_test"
+    },
+    {
+      "question": "表与滑架组装(BK100).SLDASM的BOM版本是多少？它是什么时候创建的？",
+      "ground_truth": "表与滑架组装(BK100).SLDASM的BOM版本是2，外部Id为49，创建于2023/8/28 13:11:33。这是一个装配对象，Bom审批状态为-1，来源于PLM系统。",
+      "project": "BK100_baseline_test"
+    },
+    {
+      "question": "网罩外圈(BK100).SLDPRT的材质、重量和设计者分别是什么？",
+      "ground_truth": "网罩外圈(BK100).SLDPRT的材质是Q195，重量是0.220，设计者（Author）是栾恭队。该文件使用SOLIDWORKS 2019保存，零件类型为外购件，当前工作流状态为校对中，文件ID为357，修订版本为1/1，创建于2024/10/24 9:12:46。",
+      "project": "BK100_baseline_test"
+    },
+    {
+      "question": "码表立管(BK100).SLDPRT是自制件还是外购件？它的材料规格是什么？",
+      "ground_truth": "码表立管(BK100).SLDPRT的零件类型是自制件，材料规格是SPHC1，重量是0.439。该文件由栾恭队设计，使用SOLIDWORKS 2019保存，当前工作流状态为校对中，创建于2024/10/24 9:12:46，文件ID为369。",
+      "project": "BK100_baseline_test"
+    },
+    {
+      "question": "链盖固定L板(BK100).SLDPRT的材质、重量和零件类型是什么？",
+      "ground_truth": "链盖固定L板(BK100).SLDPRT的材质是Q235，重量是0.015，零件类型为外购件。该文件由栾恭队设计，使用SOLIDWORKS 2019保存，当前工作流状态为校对中，文件ID为313，修订版本为1/1。",
+      "project": "BK100_baseline_test"
+    },
+    {
+      "question": "连杆板(BK100).SLDDRW图纸的审批流程涉及哪些角色？他们的审批日期是什么时候？",
+      "ground_truth": "连杆板(BK100).SLDDRW图纸的审批流程涉及多个角色：作者是Admin，校对人是Admin（校对日期2024-10-24），工艺人员是Admin（工艺时间2024-10-24），标准化人员是Admin（标准化时间2024-10-24），审核人是Admin（审核日期2024-10-24），批准人是Admin（批准日期2024-10-24）。图纸尺寸为297mm*210mm，材质为Q235，当前工作流状态为校对中，文件ID为327。",
+      "project": "BK100_baseline_test"
+    },
+    {
+      "question": "I型六角螺母的物料编码、库存数量和单位是什么？",
+      "ground_truth": "I型六角螺母的物料编码（ITEMNO）是SRIDD1-30，当前库存数量（ONHAND）是7.5件，单位是件。该物料的ID为192542，修订版本（REV）为1，来源于MOM系统，类别为DZ。",
+      "project": "BK100_baseline_test"
+    },
+    {
+      "question": "在BK100项目中，哪些零件是由栾恭队设计的？请列出它们的材质和重量。",
+      "ground_truth": "在BK100项目中，由栾恭队设计的零件包括：1）网罩外圈(BK100).SLDPRT（材质Q195，重量0.220）；2）码表立管(BK100).SLDPRT（材质SPHC1，重量0.439）；3）链盖固定L板(BK100).SLDPRT（材质Q235，重量0.015）。这些文件都使用SOLIDWORKS 2019保存，当前工作流状态均为校对中，均创建于2024/10/24 9:12:46。",
+      "project": "BK100_baseline_test"
+    },
+    {
+      "question": "BK100项目中有哪些装配体？它们的BOM版本分别是多少？哪个是最新版本？",
+      "ground_truth": "BK100项目中有两个装配体：1）座架组装(BK100).SLDASM，BOM版本是1，外部Id为443，创建于2026/4/9 14:41:11；2）表与滑架组装(BK100).SLDASM，BOM版本是2，外部Id为49，创建于2023/8/28 13:11:33。从创建时间来看，座架组装(BK100).SLDASM是较新的装配体（2026年创建）。",
+      "project": "BK100_baseline_test"
+    }
+  ]
+}

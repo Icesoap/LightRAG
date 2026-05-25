@@ -40,6 +40,8 @@ dependencies = [
     "tenacity",
     "tiktoken",
     "xlsxwriter>=3.1.0",
+    "ragas",
+    "datasets"
 ]
 
 [project.optional-dependencies]
@@ -148,6 +150,7 @@ test = [
 
 evaluation = [
     "lightrag-hku[api]",
+#    "ragas>=0.3.7",
     "ragas>=0.3.7",
     "datasets>=4.3.0",
 ]

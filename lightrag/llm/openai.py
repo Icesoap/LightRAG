@@ -827,6 +827,7 @@ async def openai_embed(
         if embedding_dim is not None:
             api_params["dimensions"] = embedding_dim
 
+
         # Make API call
         response = await openai_async_client.embeddings.create(**api_params)
 

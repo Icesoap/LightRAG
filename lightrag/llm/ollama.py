@@ -224,7 +224,35 @@ async def ollama_embed(
         data = await ollama_client.embed(
             model=embed_model, input=texts, options=options
         )
-        return np.array(data["embeddings"])
+        # Ollama API returns 'embedding' for single text or 'embeddings' for batch
+        # Handle both response formats for compatibility
+        if "embeddings" in data:
+            # Batch mode: multiple embeddings
+            embeddings_list = data["embeddings"]
+        elif "embedding" in data:
+            # Single text mode: one embedding
+            embeddings_list = [data["embedding"]]
+        else:
+            logger.error(
+                f"Ollama API returned invalid response. Model: {embed_model}, "
+                f"Response keys: {list(data.keys()) if isinstance(data, dict) else type(data)}"
+            )
+            raise ValueError(
+                f"No embedding data received from Ollama API for model '{embed_model}'. "
+                f"Available keys: {list(data.keys()) if isinstance(data, dict) else 'N/A'}"
+            )
+
+        if not embeddings_list:
+            logger.error(
+                f"Ollama API returned empty embeddings list. Model: {embed_model}, "
+                f"Input texts count: {len(texts)}"
+            )
+            raise ValueError(
+                f"Empty embeddings received from Ollama API for model '{embed_model}'"
+            )
+
+        return np.array(embeddings_list)
+        # return np.array(data["embeddings"])
     except Exception as e:
         logger.error(f"Error in ollama_embed: {str(e)}")
         try:

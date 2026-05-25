@@ -54,6 +54,9 @@ import httpx
 from dotenv import load_dotenv
 from lightrag.utils import logger
 
+from lightrag.utils import setup_logger
+from ragas.run_config import RunConfig
+
 # Suppress LangchainLLMWrapper deprecation warning
 # We use LangchainLLMWrapper for stability and compatibility with all RAGAS versions
 warnings.filterwarnings(
@@ -77,7 +80,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 # use the ..env that is inside the current folder
 # allows to use different ..env file for each lightrag instance
 # the OS environment variables take precedence over the ..env file
-load_dotenv(dotenv_path="..env", override=False)
+load_dotenv(dotenv_path="../../.env", override=False)
 
 # Conditional imports - will raise ImportError if dependencies not installed
 try:
@@ -100,6 +103,63 @@ except ImportError:
     Dataset = None
     evaluate = None
     LangchainLLMWrapper = None
+
+
+class OllamaEmbeddings:
+    """Custom embeddings wrapper for Ollama native API
+    
+    This class provides compatibility with RAGAS by wrapping Ollama's native
+    /api/embeddings endpoint, which returns {"embedding": [...]} format.
+    """
+    
+    def __init__(self, model: str, base_url: str = "http://localhost:11434"):
+        self.model = model
+        self.base_url = base_url.rstrip("/")
+        # Remove /api suffix if present, we'll add it ourselves
+        if self.base_url.endswith("/api"):
+            self.base_url = self.base_url[:-4]
+    
+    async def aembed_documents(self, texts: list[str]) -> list[list[float]]:
+        """Embed multiple documents using Ollama native API"""
+        import httpx
+        
+        async with httpx.AsyncClient() as client:
+            embeddings = []
+            for text in texts:
+                response = await client.post(
+                    f"{self.base_url}/api/embeddings",
+                    json={"model": self.model, "prompt": text}
+                )
+                response.raise_for_status()
+                data = response.json()
+                
+                # Handle both response formats for compatibility
+                if "embedding" in data:
+                    embeddings.append(data["embedding"])
+                elif "embeddings" in data:
+                    # Batch mode (shouldn't happen with single prompt)
+                    embeddings.extend(data["embeddings"])
+                else:
+                    raise ValueError(
+                        f"Ollama API returned invalid response. Keys: {list(data.keys())}"
+                    )
+            
+            return embeddings
+    
+    async def aembed_query(self, text: str) -> list[float]:
+        """Embed a single query using Ollama native API"""
+        result = await self.aembed_documents([text])
+        return result[0]
+    
+    def embed_documents(self, texts: list[str]) -> list[list[float]]:
+        """Synchronous version"""
+        import asyncio
+        return asyncio.run(self.aembed_documents(texts))
+    
+    def embed_query(self, text: str) -> list[float]:
+        """Synchronous version"""
+        import asyncio
+        return asyncio.run(self.aembed_query(text))
 
 
 CONNECT_TIMEOUT_SECONDS = 180.0
@@ -177,7 +237,7 @@ class RAGEvaluator:
             "model": eval_model,
             "api_key": eval_llm_api_key,
             "max_retries": int(os.getenv("EVAL_LLM_MAX_RETRIES", "5")),
-            "request_timeout": int(os.getenv("EVAL_LLM_TIMEOUT", "180")),
+            "request_timeout": int(os.getenv("EVAL_LLM_TIMEOUT", "6000")),
         }
         embedding_kwargs = {
             "model": eval_embedding_model,
@@ -185,14 +245,33 @@ class RAGEvaluator:
         }
 
         if eval_llm_base_url:
+            # # Ensure base_url ends with /v1 for OpenAI-compatible APIs
+            # if not eval_llm_base_url.endswith("/v1"):
+            #     eval_llm_base_url = eval_llm_base_url.rstrip("/") + "/v1"
+            #     logger.warning(
+            #         "Added /v1 suffix to LLM base_url: %s", eval_llm_base_url
+            #     )
             llm_kwargs["base_url"] = eval_llm_base_url
 
         if eval_embedding_base_url:
-            embedding_kwargs["base_url"] = eval_embedding_base_url
+            # Check if using Ollama native API (ends with /api or no /v1)
+            if "/v1" not in eval_embedding_base_url:
+                # Use custom Ollama embeddings wrapper
+                logger.info("Using Ollama native embeddings API: %s", eval_embedding_base_url)
+                self.eval_embeddings = OllamaEmbeddings(
+                    model=eval_embedding_model,
+                    base_url=eval_embedding_base_url
+                )
+            else:
+                # Use standard OpenAI embeddings
+                embedding_kwargs["base_url"] = eval_embedding_base_url
+                self.eval_embeddings = OpenAIEmbeddings(**embedding_kwargs)
+        else:
+            self.eval_embeddings = OpenAIEmbeddings(**embedding_kwargs)
 
         # Create base LangChain LLM
         base_llm = ChatOpenAI(**llm_kwargs)
-        self.eval_embeddings = OpenAIEmbeddings(**embedding_kwargs)
+        # self.eval_embeddings = OpenAIEmbeddings(**embedding_kwargs)
 
         # Wrap LLM with LangchainLLMWrapper and enable bypass_n mode for custom endpoints
         # This ensures compatibility with endpoints that don't support the 'n' parameter
@@ -282,7 +361,7 @@ class RAGEvaluator:
         if not self.test_dataset_path.exists():
             raise FileNotFoundError(f"Test dataset not found: {self.test_dataset_path}")
 
-        with open(self.test_dataset_path) as f:
+        with open(self.test_dataset_path, encoding='utf-8') as f:
             data = json.load(f)
 
         return data.get("test_cases", [])
@@ -362,6 +441,20 @@ class RAGEvaluator:
                 elif isinstance(content, str):
                     # Backward compatibility: if content is still a string (shouldn't happen)
                     contexts.append(content)
+                # yq 修改 2026-05-22
+                elif content is None:
+                    # Handle None content - log warning and skip this reference
+                    logger.warning(
+                        "⚠️ Reference %s has None content, skipping",
+                        ref.get("reference_id", "unknown")
+                    )
+                else:
+                    # Handle unexpected content types
+                    logger.warning(
+                        "⚠️ Reference %s has unexpected content type: %s, skipping",
+                        ref.get("reference_id", "unknown"),
+                        type(content).__name__
+                    )
 
             return {
                 "answer": answer,
@@ -426,8 +519,13 @@ class RAGEvaluator:
                 rag_response = await self.generate_rag_response(
                     question=question, client=client
                 )
+                print(f'我的测试:{rag_response}')
             except Exception as e:
-                logger.error("Error generating response for test %s: %s", idx, str(e))
+                logger.error("Error evaluating test %s: %s", idx, str(e))
+                logger.error("Error type: %s", type(e).__name__)
+                logger.error("Error details: %s", repr(e))
+                import traceback
+                logger.error("Traceback:\n%s", traceback.format_exc())
                 progress_counter["completed"] += 1
                 return {
                     "test_number": idx,
@@ -437,6 +535,17 @@ class RAGEvaluator:
                     "ragas_score": 0,
                     "timestamp": datetime.now().isoformat(),
                 }
+            # except Exception as e:
+            #     logger.error("Error generating response for test %s: %s", idx, str(e))
+            #     progress_counter["completed"] += 1
+            #     return {
+            #         "test_number": idx,
+            #         "question": question,
+            #         "error": str(e),
+            #         "metrics": {},
+            #         "ragas_score": 0,
+            #         "timestamp": datetime.now().isoformat(),
+            #     }
 
             # *** CRITICAL FIX: Use actual retrieved contexts, NOT ground_truth ***
             retrieved_contexts = rag_response["contexts"]
@@ -476,6 +585,14 @@ class RAGEvaluator:
                         # Give tqdm time to initialize and claim its screen position
                         await asyncio.sleep(0.05)
 
+                    # Create custom run config with longer timeout
+                    run_config = RunConfig(
+                        timeout=6000,  # 增加到 300 秒（5分钟）
+                        max_retries=5,  # 重试次数
+                        max_wait=600,  # 最大等待时间
+                        max_workers=1,  # 并发工作线程数
+                    )
+
                     eval_results = evaluate(
                         dataset=eval_dataset,
                         metrics=[
@@ -487,6 +604,7 @@ class RAGEvaluator:
                         llm=self.eval_llm,
                         embeddings=self.eval_embeddings,
                         _pbar=pbar,
+                        run_config=run_config,
                     )
 
                     # Convert to DataFrame (RAGAS v0.3+ API)
@@ -961,6 +1079,15 @@ async def main():
         python lightrag/evaluation/eval_rag_quality.py -d my_test.json -r http://localhost:9621
     """
     try:
+
+        # 在 main() 函数开始处调用
+        setup_logger(
+            logger_name="lightrag",
+            level="DEBUG",
+            enable_file_logging=True,  # 启用文件日志
+            log_file_path=None  # 使用默认路径：当前目录下的 lightrag.log
+        )
+
         # Parse command-line arguments
         parser = argparse.ArgumentParser(
             description="RAGAS Evaluation Script for LightRAG System",
