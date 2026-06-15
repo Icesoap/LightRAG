@@ -943,9 +943,70 @@ class Neo4JStorage(BaseGraphStorage):
             )
             raise
 
+    # yq 注释 修改为其他方法
+    # @READ_RETRY
+    # async def get_nodes_edges_batch(
+    #         self, node_ids: list[str]
+    # ) -> dict[str, list[tuple[str, str]]]:
+    #     """
+    #     Batch retrieve edges for multiple nodes in one query using UNWIND.
+    #     For each node, returns both outgoing and incoming edges to properly represent
+    #     the undirected graph nature.
+    #
+    #     Args:
+    #         node_ids: List of node IDs (entity_id) for which to retrieve edges.
+    #
+    #     Returns:
+    #         A dictionary mapping each node ID to its list of edge tuples (source, target).
+    #         For each node, the list includes both:
+    #         - Outgoing edges: (queried_node, connected_node)
+    #         - Incoming edges: (connected_node, queried_node)
+    #     """
+    #     async with self._driver.session(
+    #             database=self._DATABASE, default_access_mode="READ"
+    #     ) as session:
+    #         # Query to get both outgoing and incoming edges
+    #         workspace_label = self._get_workspace_label()
+    #         query = f"""
+    #                 UNWIND $node_ids AS id
+    #                 MATCH (n:`{workspace_label}` {{entity_id: id}})
+    #                 OPTIONAL MATCH (n)-[r]-(connected:`{workspace_label}`)
+    #                 RETURN id AS queried_id, n.entity_id AS node_entity_id,
+    #                        connected.entity_id AS connected_entity_id,
+    #                        startNode(r).entity_id AS start_entity_id
+    #             """
+    #         result = await session.run(query, node_ids=node_ids)
+    #
+    #         # Initialize the dictionary with empty lists for each node ID
+    #         edges_dict = {node_id: [] for node_id in node_ids}
+    #
+    #         # Process results to include both outgoing and incoming edges
+    #         async for record in result:
+    #             queried_id = record["queried_id"]
+    #             node_entity_id = record["node_entity_id"]
+    #             connected_entity_id = record["connected_entity_id"]
+    #             start_entity_id = record["start_entity_id"]
+    #
+    #             # Skip if either node is None
+    #             if not node_entity_id or not connected_entity_id:
+    #                 continue
+    #
+    #             # Determine the actual direction of the edge
+    #             # If the start node is the queried node, it's an outgoing edge
+    #             # Otherwise, it's an incoming edge
+    #             if start_entity_id == node_entity_id:
+    #                 # Outgoing edge: (queried_node -> connected_node)
+    #                 edges_dict[queried_id].append((node_entity_id, connected_entity_id))
+    #             else:
+    #                 # Incoming edge: (connected_node -> queried_node)
+    #                 edges_dict[queried_id].append((connected_entity_id, node_entity_id))
+    #
+    #         await result.consume()  # Ensure results are fully consumed
+    #         return edges_dict
+
     @READ_RETRY
     async def get_nodes_edges_batch(
-        self, node_ids: list[str]
+            self, node_ids: list[str]
     ) -> dict[str, list[tuple[str, str]]]:
         """
         Batch retrieve edges for multiple nodes in one query using UNWIND.
@@ -961,46 +1022,58 @@ class Neo4JStorage(BaseGraphStorage):
             - Outgoing edges: (queried_node, connected_node)
             - Incoming edges: (connected_node, queried_node)
         """
-        async with self._driver.session(
-            database=self._DATABASE, default_access_mode="READ"
-        ) as session:
-            # Query to get both outgoing and incoming edges
-            workspace_label = self._get_workspace_label()
-            query = f"""
-                UNWIND $node_ids AS id
-                MATCH (n:`{workspace_label}` {{entity_id: id}})
-                OPTIONAL MATCH (n)-[r]-(connected:`{workspace_label}`)
-                RETURN id AS queried_id, n.entity_id AS node_entity_id,
-                       connected.entity_id AS connected_entity_id,
-                       startNode(r).entity_id AS start_entity_id
-            """
-            result = await session.run(query, node_ids=node_ids)
+        # 处理空输入
+        if not node_ids:
+            return {}
 
-            # Initialize the dictionary with empty lists for each node ID
+        async with self._driver.session(
+                database=self._DATABASE, default_access_mode="READ"
+        ) as session:
+            workspace_label = self._get_workspace_label()
+
+            # 分别查询出边和入边，避免无方向匹配导致的重复问题
+            # 查询出边 (n) -> (connected)
+            outgoing_query = f"""
+                    UNWIND $node_ids AS id
+                    MATCH (n:`{workspace_label}` {{entity_id: id}})
+                    OPTIONAL MATCH (n)-[r]->(connected:`{workspace_label}`)
+                    RETURN id AS queried_id, n.entity_id AS source, connected.entity_id AS target
+                """
+
+            # 查询入边 (connected) -> (n)
+            incoming_query = f"""
+                    UNWIND $node_ids AS id
+                    MATCH (n:`{workspace_label}` {{entity_id: id}})
+                    OPTIONAL MATCH (n)<-[r]-(connected:`{workspace_label}`)
+                    RETURN id AS queried_id, connected.entity_id AS source, n.entity_id AS target
+                """
+
+            # 分别执行两个查询
+            outgoing_result = await session.run(outgoing_query, node_ids=node_ids)
+            incoming_result = await session.run(incoming_query, node_ids=node_ids)
+
+            # 初始化结果字典，确保所有输入节点都有对应的条目
             edges_dict = {node_id: [] for node_id in node_ids}
 
-            # Process results to include both outgoing and incoming edges
-            async for record in result:
+            # 处理出边结果
+            async for record in outgoing_result:
                 queried_id = record["queried_id"]
-                node_entity_id = record["node_entity_id"]
-                connected_entity_id = record["connected_entity_id"]
-                start_entity_id = record["start_entity_id"]
+                source = record["source"]
+                target = record["target"]
+                if source and target:
+                    edges_dict[queried_id].append((source, target))
 
-                # Skip if either node is None
-                if not node_entity_id or not connected_entity_id:
-                    continue
+            # 处理入边结果
+            async for record in incoming_result:
+                queried_id = record["queried_id"]
+                source = record["source"]
+                target = record["target"]
+                if source and target:
+                    edges_dict[queried_id].append((source, target))
 
-                # Determine the actual direction of the edge
-                # If the start node is the queried node, it's an outgoing edge
-                # Otherwise, it's an incoming edge
-                if start_entity_id == node_entity_id:
-                    # Outgoing edge: (queried_node -> connected_node)
-                    edges_dict[queried_id].append((node_entity_id, connected_entity_id))
-                else:
-                    # Incoming edge: (connected_node -> queried_node)
-                    edges_dict[queried_id].append((connected_entity_id, node_entity_id))
+            await outgoing_result.consume()
+            await incoming_result.consume()
 
-            await result.consume()  # Ensure results are fully consumed
             return edges_dict
 
     @retry(

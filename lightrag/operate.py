@@ -3233,6 +3233,7 @@ async def kg_query(
         )
         response = cached_response
     else:
+        # 最终调用LLM的地方 yq注释
         response = await use_model_func(
             user_query,
             system_prompt=sys_prompt,
@@ -3330,17 +3331,35 @@ async def extract_keywords_only(
     hashing_kv: BaseKVStorage | None = None,
 ) -> tuple[list[str], list[str]]:
     """
-    Extract high-level and low-level keywords from the given 'text' using the LLM.
-    This method does NOT build the final RAG context or provide a final answer.
-    It ONLY extracts keywords (hl_keywords, ll_keywords).
+    使用LLM从给定文本中提取高层和低层关键词。
+
+    该函数是RAG检索流程中的关键步骤，负责从用户查询中提取两类关键词：
+    - 高层关键词（high-level keywords）：概念性、抽象层面的关键词
+    - 低层关键词（low-level keywords）：具体、实体级别的关键词
+
+    注意：此方法**不**构建最终的RAG上下文或提供最终答案，仅提取关键词。
+
+    Args:
+        text: 用户查询文本
+        param: 查询参数对象（包含模式、top_k、缓存配置等）
+        global_config: 全局配置字典（包含LLM模型函数、tokenizer、语言设置等）
+        hashing_kv: KV存储实例，用于缓存关键词提取结果（可选）
+
+    Returns:
+        tuple: (hl_keywords, ll_keywords)
+            - hl_keywords: 高层关键词列表（概念性关键词）
+            - ll_keywords: 低层关键词列表（实体级关键词）
     """
 
-    # 1. Build the examples
+    # 1️⃣ 构建示例上下文
+    # 从PROMPTS配置中获取关键词提取的示例，用于引导LLM正确输出格式
     examples = "\n".join(PROMPTS["keywords_extraction_examples"])
 
+    # 获取语言配置，默认使用英文
     language = global_config["addon_params"].get("language", DEFAULT_SUMMARY_LANGUAGE)
 
-    # 2. Handle cache if needed - add cache type for keywords
+    # 2️⃣ 缓存处理（优先从缓存获取结果）
+    # 计算参数哈希值作为缓存键，包含模式、文本和语言
     args_hash = compute_args_hash(
         param.mode,
         text,
@@ -3349,44 +3368,52 @@ async def extract_keywords_only(
     cached_result = await handle_cache(
         hashing_kv, args_hash, text, param.mode, cache_type="keywords"
     )
+    
+    # 如果缓存命中，直接返回缓存结果
     if cached_result is not None:
-        cached_response, _ = cached_result  # Extract content, ignore timestamp
+        cached_response, _ = cached_result  # 提取内容，忽略时间戳
         try:
             keywords_data = json_repair.loads(cached_response)
             return keywords_data.get("high_level_keywords", []), keywords_data.get(
                 "low_level_keywords", []
             )
         except (json.JSONDecodeError, KeyError):
-            logger.warning(
-                "Invalid cache format for keywords, proceeding with extraction"
-            )
+            # 缓存格式无效，继续执行提取流程
+            logger.warning("Invalid cache format for keywords, proceeding with extraction")
 
-    # 3. Build the keyword-extraction prompt
+    # 3️⃣ 构建关键词提取提示词
+    # 使用模板格式化提示词，包含用户查询、示例和语言设置
     kw_prompt = PROMPTS["keywords_extraction"].format(
         query=text,
         examples=examples,
         language=language,
     )
 
+    # 计算提示词token数量，用于调试日志
     tokenizer: Tokenizer = global_config["tokenizer"]
     len_of_prompts = len(tokenizer.encode(kw_prompt))
     logger.debug(
         f"[extract_keywords] Sending to LLM: {len_of_prompts:,} tokens (Prompt: {len_of_prompts})"
     )
 
-    # 4. Call the LLM for keyword extraction
+    # 4️⃣ 调用LLM进行关键词提取
+    # 优先使用param中指定的模型函数，否则使用全局配置的模型函数
     if param.model_func:
         use_model_func = param.model_func
     else:
         use_model_func = global_config["llm_model_func"]
-        # Apply higher priority (5) to query relation LLM function
+        # 为关键词提取设置较高优先级(5)，确保资源优先分配
         use_model_func = partial(use_model_func, _priority=5)
 
+    # 调用LLM，传入keyword_extraction标记以便模型优化处理
     result = await use_model_func(kw_prompt, keyword_extraction=True)
 
-    # 5. Parse out JSON from the LLM response
+    # 5️⃣ 解析LLM响应中的JSON
+    # 移除LLM响应中的思考标签（如<think></think>）
     result = remove_think_tags(result)
+    
     try:
+        # 使用json_repair容错解析，处理LLM可能返回的不规范JSON
         keywords_data = json_repair.loads(result)
         if not keywords_data:
             logger.error("No JSON-like structure found in the LLM respond.")
@@ -3396,17 +3423,21 @@ async def extract_keywords_only(
         logger.error(f"LLM respond: {result}")
         return [], []
 
+    # 提取高层和低层关键词
     hl_keywords = keywords_data.get("high_level_keywords", [])
     ll_keywords = keywords_data.get("low_level_keywords", [])
 
-    # 6. Cache only the processed keywords with cache type
+    # 6️⃣ 缓存处理（保存提取结果）
+    # 只有当提取到关键词时才进行缓存
     if hl_keywords or ll_keywords:
         cache_data = {
             "high_level_keywords": hl_keywords,
             "low_level_keywords": ll_keywords,
         }
+        
+        # 检查是否启用了LLM缓存
         if hashing_kv.global_config.get("enable_llm_cache"):
-            # Save to cache with query parameters
+            # 构建查询参数字典，用于缓存索引
             queryparam_dict = {
                 "mode": param.mode,
                 "response_type": param.response_type,
@@ -3418,6 +3449,8 @@ async def extract_keywords_only(
                 "user_prompt": param.user_prompt or "",
                 "enable_rerank": param.enable_rerank,
             }
+            
+            # 保存到缓存
             await save_to_cache(
                 hashing_kv,
                 CacheData(
@@ -3430,6 +3463,7 @@ async def extract_keywords_only(
                 ),
             )
 
+    # 返回提取的两类关键词
     return hl_keywords, ll_keywords
 
 
@@ -4278,6 +4312,39 @@ async def _build_query_context(
     return QueryContextResult(context=context, raw_data=raw_data)
 
 
+# import json
+import numpy as np
+def print_embedding_for_attu(query_embedding) -> None:
+    """
+    将向量打印为 Attu 可视化工具可直接使用的格式
+
+    Args:
+        query_embedding: 待转换的向量（支持 list 或 numpy.ndarray）
+    """
+    # 将 ndarray 转换为 Python list
+    if isinstance(query_embedding, np.ndarray):
+        query_embedding = query_embedding.tolist()
+    elif isinstance(query_embedding, list):
+        pass  # 已经是 list，无需转换
+    else:
+        print(f"❌ 不支持的向量类型: {type(query_embedding)}")
+        return
+
+    # Attu 要求向量为 JSON 数组格式
+    attu_vector = json.dumps(query_embedding, separators=(",", ":"))
+
+    print("\n" + "=" * 80)
+    print("📊 Attu 查询向量格式")
+    print("=" * 80)
+    print("复制以下内容到 Attu 的 Vector 输入框:")
+    print("-" * 80)
+    print(attu_vector)
+    print("-" * 80)
+    print(f"📐 向量维度: {len(query_embedding)}")
+    print(f"📝 数据类型: {type(query_embedding).__name__}")
+    print("=" * 80 + "\n")
+
+
 async def _get_node_data(
     query: str,
     knowledge_graph_inst: BaseGraphStorage,
@@ -4285,56 +4352,99 @@ async def _get_node_data(
     query_param: QueryParam,
     query_embedding=None,
 ):
+    """
+    从知识图谱中检索与查询相关的节点数据和关系。
+
+    该函数是知识图谱查询的核心组件，负责：
+    1. 通过向量检索找到与查询最相关的实体
+    2. 批量获取这些实体的详细信息和连接度
+    3. 挖掘实体之间的关联关系
+
+    Args:
+        query: 用户查询文本
+        knowledge_graph_inst: 知识图谱存储实例
+        entities_vdb: 实体向量数据库实例
+        query_param: 查询参数（包含 top_k 等配置）
+        query_embedding: 可选的预计算查询向量，避免重复计算
+
+    Returns:
+        tuple: (node_datas, use_relations)
+            - node_datas: 实体节点列表，包含实体详情、相似度排名等
+            - use_relations: 实体之间的关联关系列表
+    """
+    # 记录查询日志，包含关键参数（top_k、相似度阈值）
     logger.info(
         f"Query nodes: {query} (top_k:{query_param.top_k}, cosine:{entities_vdb.cosine_better_than_threshold})"
     )
 
+    # ========== 添加打印逻辑（已修复 ndarray 序列化问题） ==========
+    if query_embedding is not None:
+        print_embedding_for_attu(query_embedding)
+    # ========== 打印逻辑结束 ==========
+
+    # TODO 1 到向量库取实体
+    # 1️⃣ 向量检索：在实体向量库中查找与查询最相似的实体
+    # 支持预计算向量传入，避免重复计算
     results = await entities_vdb.query(
         query, top_k=query_param.top_k, query_embedding=query_embedding
     )
 
+    # 无检索结果时直接返回空列表
     if not len(results):
         return [], []
 
-    # Extract all entity IDs from your results list
+    # 2️⃣ 提取实体ID列表，用于后续批量查询
     node_ids = [r["entity_name"] for r in results]
 
-    # Call the batch node retrieval and degree functions concurrently.
+    # 查看实际类型
+    # print(type(knowledge_graph_inst).__name__)
+
+    # 3️⃣ 并发批量查询：同时获取节点详情和节点连接度
+    # 使用 asyncio.gather 提高查询效率，避免串行等待
     nodes_dict, degrees_dict = await asyncio.gather(
-        knowledge_graph_inst.get_nodes_batch(node_ids),
-        knowledge_graph_inst.node_degrees_batch(node_ids),
+        knowledge_graph_inst.get_nodes_batch(node_ids),  # 获取节点详细信息 # TODO 2 到知识图谱取节点详情
+        knowledge_graph_inst.node_degrees_batch(node_ids),  # 获取节点连接度
     )
 
-    # Now, if you need the node data and degree in order:
+    # 4️⃣ 按原始顺序整理数据
+    # 因为批量查询返回的是字典，需要按 node_ids 顺序重新排列
     node_datas = [nodes_dict.get(nid) for nid in node_ids]
     node_degrees = [degrees_dict.get(nid, 0) for nid in node_ids]
 
+    # 检查是否有节点数据缺失（可能是存储损坏）
     if not all([n is not None for n in node_datas]):
         logger.warning("Some nodes are missing, maybe the storage is damaged")
 
+    # 5️⃣ 数据格式标准化
+    # 将检索结果、节点详情、连接度合并为统一格式
     node_datas = [
         {
-            **n,
-            "entity_name": k["entity_name"],
-            "rank": d,
-            "created_at": k.get("created_at"),
+            **n,  # 展开节点原始数据
+            "entity_name": k["entity_name"],  # 实体名称
+            "rank": d,  # 节点连接度（用于排序）
+            "created_at": k.get("created_at"),  # 创建时间
         }
         for k, n, d in zip(results, node_datas, node_degrees)
-        if n is not None
+        if n is not None  # 过滤缺失的节点
     ]
 
+    # 6️⃣ 挖掘实体之间的关联关系
+    # 根据查询参数和节点数据，找出最相关的边关系
+    # TODO 3 到知识图谱取实体之间的关联关系
     use_relations = await _find_most_related_edges_from_entities(
         node_datas,
         query_param,
         knowledge_graph_inst,
     )
 
+    # 记录查询统计信息
     logger.info(
         f"Local query: {len(node_datas)} entites, {len(use_relations)} relations"
     )
 
-    # Entities are sorted by cosine similarity
-    # Relations are sorted by rank + weight
+    # 返回结果：
+    # - 实体按余弦相似度排序（由向量检索保证）
+    # - 关系按 rank + weight 排序（由 _find_most_related_edges_from_entities 保证）
     return node_datas, use_relations
 
 

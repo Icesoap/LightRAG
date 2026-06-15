@@ -1357,6 +1357,16 @@ def truncate_list_by_token_size(
     """Truncate a list of data by token size"""
     if max_token_size <= 0:
         return []
+    # 计算 list_data 的总 token 数
+    total_tokens = sum(len(tokenizer.encode(key(item))) for item in list_data)
+
+    print(f"total_tokens: {total_tokens}")
+
+    # 计算每个元素的 token 数
+    token_counts = [len(tokenizer.encode(key(item))) for item in list_data]
+
+    print(f"token_counts: {token_counts}")
+
     tokens = 0
     for i, data in enumerate(list_data):
         tokens += len(tokenizer.encode(key(data)))
@@ -1371,7 +1381,6 @@ def cosine_similarity(v1, v2):
     norm1 = np.linalg.norm(v1)
     norm2 = np.linalg.norm(v2)
     return dot_product / (norm1 * norm2)
-
 
 async def handle_cache(
     hashing_kv,
@@ -2647,7 +2656,12 @@ async def apply_rerank_if_enabled(
             return retrieved_docs
 
     except Exception as e:
-        logger.error(f"Error during reranking: {e}, using original chunks")
+        # logger.error(f"Error during reranking: {e}, using original chunks")
+        logger.error(
+            f"Error during reranking: {type(e).__name__}: {str(e)}, "
+            f"using original chunks. Full traceback:",
+            exc_info=True
+        )
         return retrieved_docs
 
 
